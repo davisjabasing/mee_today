@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Notifications</h2>
+
+    <h3>Received Requests</h3>
+    <div>
+        {% for appointment in received_appointments %}
+        <div class="notification-card">
+            <p>You have a request for an appointment with {{ appointment.requester.username }}.</p>
+            <button onclick="toggleDetails({{ appointment.id }})">View Details</button>
+            <div id="details-{{ appointment.id }}" style="display:none;">
+                <p>Reason: {{ appointment.reason }}</p>
+                <p>Date: {{ appointment.date }} | Time: {{ appointment.time }}</p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="appointment_id" value="{{ appointment.id }}">
+                    <button type="submit" name="status" value="accepted">Accept</button>
+                    <button type="submit" name="status" value="modify">Modify</button>
+                    <button type="submit" name="status" value="rejected">Reject</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h3>Sent Requests</h3>
+    <div>
+        {% for appointment in sent_appointments %}
+        <div class="notification-card">
+            <p>You requested an appointment with {{ appointment.receiver.username }}.</p>
+            <p>Status: {{ appointment.status }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function toggleDetails(id) {
+            var details = document.getElementById('details-' + id);
+            if (details.style.display === "none") {
+                details.style.display = "block";
+            } else {
+                details.style.display = "none";
+            }
+        }
+    </script>
+{% endblock %}

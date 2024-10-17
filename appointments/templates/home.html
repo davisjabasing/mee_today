@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Welcome to Mee Today</h2>
+    <p>“Your solution for seamless appointments.”</p>
+    
+    <div class="search-bar">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="name" placeholder="Search by name">
+            <input type="text" name="profession" placeholder="Search by profession">
+            <input type="text" name="location" placeholder="Search by location">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    {% if users %}
+        <h3>Search Results</h3>
+        <ul>
+            {% for user in users %}
+                <li>
+                    <a href="{% url 'profile' user.user.id %}">
+                        {{ user.user.username }} - {{ user.profession }} - {{ user.location }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No users found.</p>
+    {% endif %}
+{% endblock %}

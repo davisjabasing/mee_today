@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>{{ profile.user.username }}'s Profile</h2>
+    <p><strong>Name:</strong> {{ profile.user.username }}</p>
+    <p><strong>Profession:</strong> {{ profile.profession }}</p>
+    <p><strong>Location:</strong> {{ profile.location }}</p>
+    <p><strong>Description:</strong> {{ profile.description }}</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <h3>Request an Appointment</h3>
+        <textarea name="reason" placeholder="Reason for appointment" required></textarea>
+        <input type="datetime-local" name="date" required>
+        <button type="submit">Request Appointment</button>
+    </form>
+{% endblock %}

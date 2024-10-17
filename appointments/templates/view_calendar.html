@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Your Calendar</h2>
+
+    <div id="calendar"></div>
+
+    <h3>Appointments</h3>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>With</th>
+            <th>Reason</th>
+            <th>Status</th>
+        </tr>
+        {% for appointment in appointments %}
+        <tr>
+            <td>{{ appointment.date }}</td>
+            <td>{{ appointment.time }}</td>
+            <td>{{ appointment.requester.username }}</td>
+            <td>{{ appointment.reason }}</td>
+            <td>{{ appointment.status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <script>
+        // JavaScript logic to render a basic calendar (you can use a library like FullCalendar)
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: [
+                    {% for appointment in appointments %}
+                    {
+                        title: 'Appointment with {{ appointment.requester.username }}',
+                        start: '{{ appointment.date }}',
+                        description: '{{ appointment.reason }}',
+                        extendedProps: {
+                            status: '{{ appointment.status }}',
+                        }
+                    },
+                    {% endfor %}
+                ]
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}
