@@ -17,4 +17,7 @@ urlpatterns = [
 
 
     path('check-username/', views.check_username, name='check_username'),
+
+    path('forgot-password/', views.forgot_password_view, name='forgot_password_view'),
+    
 ]

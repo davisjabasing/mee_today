@@ -6,8 +6,13 @@ class UserProfile(models.Model):
     profession = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    photo = models.ImageField(upload_to='profiles/', blank=True)
+    phone_number = models.CharField(max_length=15)  # Phone number
+    photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)  # Photo field
     sex = models.CharField(max_length=10)
+    age = models.IntegerField(null=True, blank=True)  # New age field
+
+    def __str__(self):
+        return self.user.username
 
 class Appointment(models.Model):
     requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_requests')
