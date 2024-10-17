@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block content %}
     <h2>Register</h2>
     {% if error %}
@@ -6,7 +7,8 @@
     {% endif %}
     <form method="POST">
         {% csrf_token %}
-        <input type="text" name="username" placeholder="Username" required>
+        <input type="text" id="username" name="username" placeholder="Username" required>
+        <span id="username-feedback"></span>
         <input type="text" name="name" placeholder="Full Name" required>
         <input type="text" name="profession" placeholder="Profession" required>
         <input type="text" name="location" placeholder="Location" required>
@@ -16,4 +18,28 @@
         <button type="submit">Register</button>
     </form>
     <a href="{% url 'login' %}">Already have an account? Login</a>
+
+    <script>
+        document.getElementById('username').addEventListener('input', function() {
+            var username = this.value;
+            var feedback = document.getElementById('username-feedback');
+            
+            if (username.length > 0) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/check-username/?username=' + username, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onload = function () {
+                    var data = JSON.parse(this.responseText);
+                    if (data.is_taken) {
+                        feedback.innerHTML = '<span style="color: red;">&#x2718; Username is already taken.</span>';
+                    } else {
+                        feedback.innerHTML = '<span style="color: green;">&#x2714; Username is available.</span>';
+                    }
+                };
+                xhr.send();
+            } else {
+                feedback.innerHTML = '';
+            }
+        });
+    </script>
 {% endblock %}
