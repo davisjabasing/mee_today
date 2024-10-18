@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from .models import UserProfile, Appointment, Notification
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
+from django.contrib import messages
 
 # Login View
 def login_view(request):
@@ -96,22 +97,65 @@ def calendar_view(request):
     appointments = Appointment.objects.filter(recipient=request.user, status='accepted')
     return render(request, 'view_calendar.html', {'appointments': appointments})
 
-# Notifications View
-# def notifications_view(request):
-#     notifications = Notification.objects.filter(user=request.user)
-#     return render(request, 'notifications.html', {'notifications': notifications})
-
 @login_required
 def notifications(request):
     user = request.user
-    received_appointments = Appointment.objects.filter(receiver=user)
-    sent_appointments = Appointment.objects.filter(requester=user)
+    
+    # Appointments where the current user is the recipient (for received requests)
+    received_pending_appointments = Appointment.objects.filter(recipient=user, status='pending')
+    received_rejected_appointments = Appointment.objects.filter(recipient=user, status='rejected')
+
+    # Appointments where the current user is the requester (for sent requests)
+    sent_pending_appointments = Appointment.objects.filter(requester=user, status='pending')
+    sent_cancelled_appointments = Appointment.objects.filter(requester=user, status='rejected')
 
     context = {
-        'received_appointments': received_appointments,
-        'sent_appointments': sent_appointments,
+        'received_pending_appointments': received_pending_appointments,
+        'received_rejected_appointments': received_rejected_appointments,
+        'sent_pending_appointments': sent_pending_appointments,
+        'sent_cancelled_appointments': sent_cancelled_appointments,
     }
+
     return render(request, 'notifications.html', context)
+
+@login_required
+def accept_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    if request.method == 'POST' and appointment.recipient == request.user:
+        appointment.status = 'accepted'
+        appointment.save()
+        return redirect('notifications')
+
+@login_required
+def reject_appointment(request, appointment_id):
+    # Get the appointment object
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    # Check if the current user is the recipient (y) who can reject the request
+    if appointment.recipient == request.user:
+        # Update the status to 'rejected'
+        appointment.status = 'rejected'
+        appointment.save()
+        
+        # Notify the requester (x) that their appointment was rejected
+        messages.success(request, "Appointment request rejected.")
+        return redirect('notifications')  # Adjust this redirect as needed
+    else:
+        # If the user is not authorized to reject, show an error
+        messages.error(request, "You are not authorized to reject this appointment.")
+        return redirect('notifications')
+
+@login_required
+def modify_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    if request.method == 'POST' and appointment.recipient == request.user:
+        appointment.status = 'modified'
+        appointment.save()
+        return redirect('notifications')
+
+def notify_user(user, message):
+    # Here, implement a notification system to notify the user (e.g., saving notifications in a model)
+    pass
 
 def logout_view(request):
     logout(request)

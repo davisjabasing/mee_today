@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Modify Appointment</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <label for="new_time">New Time:</label>
+    <input type="datetime-local" name="new_time" id="new_time" value="{{ appointment.time }}" required>
+    <button type="submit">Save Changes</button>
+</form>
+{% endblock %}

@@ -129,3 +129,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login'  # Redirect users to the login page if they are not logged in
 LOGOUT_REDIRECT_URL = 'login'  # After logout, redirect users to the login page
+
+
+
+
