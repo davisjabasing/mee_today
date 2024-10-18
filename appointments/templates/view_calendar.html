@@ -1,49 +1,61 @@
 {% extends 'base.html' %}
-
 {% block content %}
     <h2>Your Calendar</h2>
 
     <div id="calendar"></div>
 
-    <h3>Appointments</h3>
-    <table>
-        <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>With</th>
-            <th>Reason</th>
-            <th>Status</th>
-        </tr>
-        {% for appointment in appointments %}
-        <tr>
-            <td>{{ appointment.date }}</td>
-            <td>{{ appointment.time }}</td>
-            <td>{{ appointment.requester.username }}</td>
-            <td>{{ appointment.reason }}</td>
-            <td>{{ appointment.status }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
     <script>
-        // JavaScript logic to render a basic calendar (you can use a library like FullCalendar)
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
+
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
+                initialView: 'timeGridWeek',  // Week view with time blocks
+                slotDuration: '00:30:00',     // Time blocks of 30 minutes
+                nowIndicator: true,           // Show current time indicator
+                editable: false,              // No dragging or resizing appointments
+                selectable: false,            // No selecting time ranges
+
                 events: [
                     {% for appointment in appointments %}
                     {
                         title: 'Appointment with {{ appointment.requester.username }}',
-                        start: '{{ appointment.date }}',
+                        start: '{{ appointment.date|date:"Y-m-d\\TH:i:s" }}',  // Start date in proper ISO format
+                        end: '{{ appointment.date|date:"Y-m-d\\TH:i:s"|add:"0:30:00" }}', // End date 30 minutes later
                         description: '{{ appointment.reason }}',
                         extendedProps: {
+                            requester: '{{ appointment.requester.username }}',
                             status: '{{ appointment.status }}',
+                            reason: '{{ appointment.reason }}',
                         }
                     },
                     {% endfor %}
-                ]
+                ],
+
+                // Event click to show details
+                eventClick: function(info) {
+                    var content = `
+                        <strong>With:</strong> ${info.event.extendedProps.requester} <br>
+                        <strong>Reason:</strong> ${info.event.extendedProps.reason} <br>
+                        <strong>Status:</strong> ${info.event.extendedProps.status}
+                    `;
+                    var modal = document.createElement('div');
+                    modal.innerHTML = content;
+                    modal.style.position = 'absolute';
+                    modal.style.backgroundColor = '#fff';
+                    modal.style.border = '1px solid #ccc';
+                    modal.style.padding = '10px';
+                    modal.style.zIndex = '1000';
+                    document.body.appendChild(modal);
+
+                    modal.style.left = info.jsEvent.pageX + 'px';
+                    modal.style.top = info.jsEvent.pageY + 'px';
+
+                    document.addEventListener('click', function() {
+                        modal.remove();
+                    }, { once: true });
+                },
             });
+
             calendar.render();
         });
     </script>

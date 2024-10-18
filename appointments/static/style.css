@@ -75,3 +75,27 @@ footer {
 .error {
     color: red;
 }
+
+.notification-box {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.notification-box h3 {
+    margin-top: 0;
+}
+
+.notification-box ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.notification-box li {
+    margin-bottom: 10px;
+}
+
+
+

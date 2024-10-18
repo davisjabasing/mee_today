@@ -94,28 +94,34 @@ def profile_view(request, user_id):
 
 # Calendar View
 def calendar_view(request):
+    # Get only accepted appointments
     appointments = Appointment.objects.filter(recipient=request.user, status='accepted')
     return render(request, 'view_calendar.html', {'appointments': appointments})
 
 @login_required
 def notifications(request):
     user = request.user
-    
-    # Appointments where the current user is the recipient (for received requests)
-    received_pending_appointments = Appointment.objects.filter(recipient=user, status='pending')
-    received_rejected_appointments = Appointment.objects.filter(recipient=user, status='rejected')
 
-    # Appointments where the current user is the requester (for sent requests)
+    # Pending appointments
+    received_pending_appointments = Appointment.objects.filter(recipient=user, status='pending')
     sent_pending_appointments = Appointment.objects.filter(requester=user, status='pending')
+
+    # Accepted appointments
+    received_accepted_appointments = Appointment.objects.filter(recipient=user, status='accepted')
+    sent_accepted_appointments = Appointment.objects.filter(requester=user, status='accepted')
+
+    # Rejected appointments
+    received_rejected_appointments = Appointment.objects.filter(recipient=user, status='rejected')
     sent_cancelled_appointments = Appointment.objects.filter(requester=user, status='rejected')
 
     context = {
         'received_pending_appointments': received_pending_appointments,
-        'received_rejected_appointments': received_rejected_appointments,
         'sent_pending_appointments': sent_pending_appointments,
+        'received_accepted_appointments': received_accepted_appointments,
+        'sent_accepted_appointments': sent_accepted_appointments,
+        'received_rejected_appointments': received_rejected_appointments,
         'sent_cancelled_appointments': sent_cancelled_appointments,
     }
-
     return render(request, 'notifications.html', context)
 
 @login_required
@@ -147,11 +153,28 @@ def reject_appointment(request, appointment_id):
 
 @login_required
 def modify_appointment(request, appointment_id):
-    appointment = get_object_or_404(Appointment, id=appointment_id)
-    if request.method == 'POST' and appointment.recipient == request.user:
-        appointment.status = 'modified'
-        appointment.save()
-        return redirect('notifications')
+    # Retrieve the appointment
+    appointment = get_object_or_404(Appointment, id=appointment_id, recipient=request.user)
+
+    if request.method == 'POST':
+        # Process the form submission (modification)
+        new_date = request.POST.get('new_date')
+        new_reason = request.POST.get('new_reason')
+
+        if new_date and new_reason:
+            # Update the appointment with new values
+            appointment.date = new_date
+            appointment.reason = new_reason
+            appointment.status = 'modified'
+            appointment.save()
+
+            # Redirect to notifications or any page after modification
+            return redirect('notifications')
+        else:
+            return render(request, 'modify_appointment.html', {'appointment': appointment, 'error': 'All fields are required.'})
+
+    # For GET requests, display the modification form
+    return render(request, 'modify_appointment.html', {'appointment': appointment})
 
 def notify_user(user, message):
     # Here, implement a notification system to notify the user (e.g., saving notifications in a model)
