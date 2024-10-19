@@ -62,19 +62,37 @@ def register_view(request):
 
 # Home View (with Search functionality)
 def home_view(request):
-    if request.method == 'POST':
-        search_name = request.POST.get('name')
-        search_profession = request.POST.get('profession')
-        search_location = request.POST.get('location')
+    if request.method == "POST":
+        name = request.POST.get('name')
+        profession = request.POST.get('profession')
+        location = request.POST.get('location')
+
         users = UserProfile.objects.all()
-        if search_name:
-            users = users.filter(user__username__icontains=search_name)
-        if search_profession:
-            users = users.filter(profession__icontains=search_profession)
-        if search_location:
-            users = users.filter(location__icontains=search_location)
-        return render(request, 'home.html', {'users': users})
-    return render(request, 'home.html')
+
+        if name:
+            users = users.filter(user__username__icontains=name)
+        if profession:
+            users = users.filter(profession__icontains=profession)
+        if location:
+            users = users.filter(location__icontains=location)
+
+        # Fetch 2 random users if no results found
+        if not users.exists():
+            all_users = UserProfile.objects.exclude(user=request.user)
+            suggested_users = all_users.order_by('?')[:2]  # Fetch two random users
+
+        else:
+            suggested_users = None  # No suggested users if search results found
+
+    else:
+        users = None
+        suggested_users = None
+
+    context = {
+        'users': users,
+        'suggested_users': suggested_users,
+    }
+    return render(request, 'home.html', context)
 
 # Profile View
 def profile_view(request, user_id):

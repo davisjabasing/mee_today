@@ -1,30 +1,60 @@
 {% extends 'base.html' %}
+{% load static %}  <!-- Load the static tag for static files -->
+
 {% block content %}
     <h2>Welcome to Mee Today</h2>
     <p>“Your solution for seamless appointments.”</p>
-    
+
     <div class="search-bar">
-        <form method="POST">
-            {% csrf_token %}
-            <input type="text" name="name" placeholder="Search by name">
-            <input type="text" name="profession" placeholder="Search by profession">
-            <input type="text" name="location" placeholder="Search by location">
-            <button type="submit">Search</button>
-        </form>
+        <!-- Check if the user is authenticated -->
+        {% if user.is_authenticated %}
+            <form method="POST">
+                {% csrf_token %}
+                <input type="text" name="name" placeholder="Search by name">
+                <input type="text" name="profession" placeholder="Search by profession">
+                <input type="text" name="location" placeholder="Search by location">
+                <button type="submit">Search</button>
+            </form>
+        {% else %}
+            <p>Please <a href="{% url 'login' %}">log in</a> to use the search function.</p>
+        {% endif %}
     </div>
 
     {% if users %}
         <h3>Search Results</h3>
-        <ul>
+        <div class="user-results">
             {% for user in users %}
-                <li>
+                <div class="user-box">
                     <a href="{% url 'profile' user.user.id %}">
-                        {{ user.user.username }} - {{ user.profession }} - {{ user.location }}
+                        {% if user.photo %}
+                            <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo">
+                        {% else %}
+                            <img src="{% static 'images/default_image.webp' %}" alt="Default photo">
+                        {% endif %}
+                        <p>{{ user.user.username }}</p>
+                        <p>{{ user.profession }}</p>
+                        <p>{{ user.location }}</p>
                     </a>
-                </li>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
-        <p>No users found.</p>
+        <h3>No users found. Suggested Users:</h3>
+        <div class="user-results">
+            {% for user in suggested_users %}
+                <div class="user-box">
+                    <a href="{% url 'profile' user.user.id %}">
+                        {% if user.photo %}
+                            <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo">
+                        {% else %}
+                            <img src="{% static 'images/default_image.webp' %}" alt="Default photo">
+                        {% endif %}
+                        <p>{{ user.user.username }}</p>
+                        <p>{{ user.profession }}</p>
+                        <p>{{ user.location }}</p>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 {% endblock %}
