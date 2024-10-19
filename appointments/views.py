@@ -93,6 +93,7 @@ def profile_view(request, user_id):
     return render(request, 'profile.html', {'profile': user_profile})
 
 # Calendar View
+@login_required
 def calendar_view(request):
     # Get only accepted appointments
     appointments = Appointment.objects.filter(recipient=request.user, status='accepted')
