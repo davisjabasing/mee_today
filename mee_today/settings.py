@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-a6k1)i14lh%=3rj7_x8yn9a9tz@g%_i-uzxhnrvdmz=(9d*hcr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',  # Allow localhost
+    'localhost',  # Allow localhost
+    '449f-103-214-61-145.ngrok-free.app',  # Add your ngrok URL here
+]
 
 
 # Application definition
@@ -130,6 +135,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'  # Redirect users to the login page if they are not logged in
 LOGOUT_REDIRECT_URL = 'login'  # After logout, redirect users to the login page
 
-
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://449f-103-214-61-145.ngrok-free.app',  # Add your ngrok URL here
+# ]
 
 

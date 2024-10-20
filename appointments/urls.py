@@ -8,6 +8,7 @@ urlpatterns = [
     path('profile/<int:user_id>/', views.profile_view, name='profile'),
     path('calendar/', views.calendar_view, name='calendar'),
     path('logout/', views.logout_view, name='logout'),
+    path('Edit_Profile/', views.edit_profile, name='edit_profile'),
 
 
     path('handle_appointment_status/', views.handle_appointment_status, name='handle_appointment_status'),
@@ -17,6 +18,11 @@ urlpatterns = [
     path('check-username/', views.check_username, name='check_username'),
 
     path('forgot-password/', views.forgot_password_view, name='forgot_password_view'),
+
+
+    ############Edit page password change
+
+    path('change-password/', views.change_password, name='change_password'),
 
 
 

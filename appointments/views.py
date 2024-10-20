@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from .models import UserProfile, Appointment, Notification
-from django.contrib.auth import authenticate, login, logout
+from .models import UserProfile, Appointment
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
@@ -263,8 +263,74 @@ def forgot_password_view(request):
     
     return render(request, 'forgot_password.html')
 
+@login_required
+def edit_profile(request):
+    profile = request.user.userprofile  # Fetch UserProfile instance for the logged-in user
+    
+    if request.method == 'POST':
+        # Check and update each field only if it's changed
+        if 'profession' in request.POST and request.POST['profession'] != profile.profession:
+            profile.profession = request.POST['profession']
 
+        if 'location' in request.POST and request.POST['location'] != profile.location:
+            profile.location = request.POST['location']
 
+        if 'description' in request.POST and request.POST['description'] != profile.description:
+            profile.description = request.POST['description']
 
+        if 'phone_number' in request.POST and request.POST['phone_number'] != profile.phone_number:
+            profile.phone_number = request.POST['phone_number']
 
+        if 'age' in request.POST and request.POST['age'] != str(profile.age):
+            profile.age = request.POST['age']
+
+        if 'sex' in request.POST and request.POST['sex'] != profile.sex:
+            profile.sex = request.POST['sex']
+
+        if 'photo' in request.FILES:
+            profile.photo = request.FILES['photo']
+
+        profile.save()  # Save the changes to the profile
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('home')  # Redirect to home after saving changes
+
+    return render(request, 'edit_profile.html', {
+        'user': request.user,
+        'profile': profile
+    })
+
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        user = request.user
+
+        # Check if current password is correct
+        if not user.check_password(current_password):
+            messages.error(request, "Current password is incorrect. Please try again.")
+            return redirect('edit_profile')
+
+        # Check if new password and confirm password match
+        if new_password != confirm_password:
+            messages.error(request, "New passwords do not match. Please try again.")
+            return redirect('edit_profile')
+
+        # If everything is correct, show a confirmation prompt
+        if request.POST.get('confirm_change') == 'yes':  # Assuming 'confirm_change' holds the value from the prompt
+            # Change the password and update the session
+            user.set_password(new_password)
+            user.save()
+            update_session_auth_hash(request, user)  # Prevents logout after password change
+
+            # Show success message
+            messages.success(request, "Password changed successfully.")
+            return redirect('edit_profile')
+
+        # If the user cancels the password change
+        messages.info(request, "Password change cancelled.")
+        return redirect('edit_profile')
+
+    return render(request, 'edit_profile.html')
 

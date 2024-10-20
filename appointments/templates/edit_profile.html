@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>Edit Profile</h2>
+
+<!-- Show the current username at the top, not editable -->
+<p><strong>Name:</strong> {{ user.username }}</p>
+
+<!-- Form to edit profile -->
+<form method="POST" enctype="multipart/form-data" id="edit-profile-form">
+    {% csrf_token %}
+
+    <!-- Show user profile details in readonly mode by default -->
+    <div class="profile-details" id="profile-details">
+        <label for="profession">Profession:</label>
+        <input type="text" id="profession" name="profession" value="{{ profile.profession }}" readonly>
+
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" value="{{ profile.location }}" readonly>
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" readonly>{{ profile.description }}</textarea>
+
+        <label for="phone_number">Phone Number:</label>
+        <input type="text" id="phone_number" name="phone_number" value="{{ profile.phone_number }}" readonly>
+
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" value="{{ profile.age }}" readonly>
+
+        <label for="sex">Sex:</label>
+        <input type="text" id="sex" name="sex" value="{{ profile.sex }}" readonly>
+
+        <label for="photo">Photo:</label>
+        {% if profile.photo %}
+            <img src="{{ profile.photo.url }}" alt="Profile Photo" width="100">
+        {% else %}
+            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Photo" width="100">
+        {% endif %}
+        <input type="file" id="photo" name="photo" style="display:none;">  <!-- Hidden until editing -->
+    </div>
+
+    <!-- Button to enable editing -->
+    <button type="button" id="edit-btn" onclick="enableEdit()">Edit</button>
+
+    <!-- Save Changes button will appear after editing is enabled -->
+    <button type="submit" id="save-changes-btn" style="display:none;">Save Changes</button>
+</form>
+
+<!-- Change password section always visible -->
+<h3>Change Password</h3>
+<form method="POST" action="{% url 'change_password' %}" id="change-password-form">
+    {% csrf_token %}
+    <input type="password" name="current_password" placeholder="Current Password" required>
+    <input type="password" name="new_password" placeholder="New Password" required>
+    <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
+    <button type="button" onclick="confirmPasswordChange()">Change Password</button>
+</form>
+
+<!-- Display messages for success or error -->
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<script>
+    function enableEdit() {
+        // Enable the form fields for editing
+        document.getElementById('profession').removeAttribute('readonly');
+        document.getElementById('location').removeAttribute('readonly');
+        document.getElementById('description').removeAttribute('readonly');
+        document.getElementById('phone_number').removeAttribute('readonly');
+        document.getElementById('age').removeAttribute('readonly');
+        document.getElementById('sex').removeAttribute('readonly');
+        document.getElementById('photo').style.display = 'block';  // Show file input for photo
+
+        // Hide the edit button and show the save changes button
+        document.getElementById('edit-btn').style.display = 'none';
+        document.getElementById('save-changes-btn').style.display = 'block';
+    }
+
+    function confirmPasswordChange() {
+        if (confirm("Do you want to change the password?")) {
+            // If the user clicks "Yes", submit the form with confirmation
+            const form = document.getElementById('change-password-form');
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'confirm_change';
+            hiddenInput.value = 'yes';
+            form.appendChild(hiddenInput);
+            form.submit();
+        } else {
+            // If the user clicks "No", return without submitting
+            return false;
+        }
+    }
+</script>
+
+{% endblock %}

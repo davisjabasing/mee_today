@@ -20,6 +20,7 @@
                 <span>Hello, {{ user.username }}</span>
                 <a href="{% url 'calendar' %}">View Calendar</a>
                 <a href="{% url 'notifications' %}">Notifications</a>
+                <a href="{% url 'edit_profile' %}">Edit Profile</a>  <!-- New Edit Profile Button -->
                 <a href="{% url 'logout' %}">Logout</a>
             {% else %}
                 <a href="{% url 'login' %}">Login</a>
@@ -27,14 +28,13 @@
             {% endif %}
         </div>
     </nav>
-
     <div class="container">
         {% block content %}
         {% endblock %}
     </div>
 
-    <footer>
+    <!-- <footer>
         <p>© 2024 Mee Today. All rights reserved.</p>
-    </footer>
+    </footer> -->
 </body>
 </html>
