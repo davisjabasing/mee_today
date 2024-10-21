@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}  <!-- Load the static tag for static files -->
-
+{% load static %}
 {% block content %}
     <h2>Welcome to Mee Today</h2>
     <p>“Your solution for seamless appointments.”</p>
@@ -27,9 +26,9 @@
                 <div class="user-box">
                     <a href="{% url 'profile' user.user.id %}">
                         {% if user.photo %}
-                            <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo">
+                            <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo" style="width: 38px; height: 38px;">
                         {% else %}
-                            <img src="{% static 'images/default_image.webp' %}" alt="Default photo">
+                            <img src="{% static 'images/default_image.webp' %}" alt="Default photo" style="width: 38px; height: 38px;">
                         {% endif %}
                         <p>{{ user.user.username }}</p>
                         <p>{{ user.profession }}</p>
@@ -45,9 +44,9 @@
                 <div class="user-box">
                     <a href="{% url 'profile' user.user.id %}">
                         {% if user.photo %}
-                            <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo">
+                            <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo" style="width: 38px; height: 38px;">
                         {% else %}
-                            <img src="{% static 'images/default_image.webp' %}" alt="Default photo">
+                            <img src="{% static 'images/pexels-pixabay-33045.jpg' %}" alt="Default photo" style="width: 38px; height: 38px;">
                         {% endif %}
                         <p>{{ user.user.username }}</p>
                         <p>{{ user.profession }}</p>

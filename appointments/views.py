@@ -60,6 +60,7 @@ def register_view(request):
     
     return render(request, 'register.html')
 
+
 # Home View (with Search functionality)
 def home_view(request):
     if request.method == "POST":
@@ -268,7 +269,7 @@ def edit_profile(request):
     profile = request.user.userprofile  # Fetch UserProfile instance for the logged-in user
     
     if request.method == 'POST':
-        # Check and update each field only if it's changed
+        # Update only fields that have changed
         if 'profession' in request.POST and request.POST['profession'] != profile.profession:
             profile.profession = request.POST['profession']
 
@@ -288,7 +289,7 @@ def edit_profile(request):
             profile.sex = request.POST['sex']
 
         if 'photo' in request.FILES:
-            profile.photo = request.FILES['photo']
+            profile.photo = request.FILES['photo']  # Update photo if a new one is uploaded
 
         profile.save()  # Save the changes to the profile
         messages.success(request, 'Profile updated successfully!')
@@ -298,6 +299,7 @@ def edit_profile(request):
         'user': request.user,
         'profile': profile
     })
+
 
 def change_password(request):
     if request.method == 'POST':

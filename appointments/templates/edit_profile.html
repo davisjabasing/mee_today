@@ -30,13 +30,17 @@
         <label for="sex">Sex:</label>
         <input type="text" id="sex" name="sex" value="{{ profile.sex }}" readonly>
 
+        <!-- Display current photo and allow for a new upload -->
         <label for="photo">Photo:</label>
         {% if profile.photo %}
-            <img src="{{ profile.photo.url }}" alt="Profile Photo" width="100">
+            <img id="photo-preview" src="{{ profile.photo.url }}" alt="Profile Photo" style="width: 38px; height: 38px;"> <!-- 1 cm = ~38 pixels -->
+            <p>Current Photo: {{ profile.photo.name }}</p>
         {% else %}
-            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Photo" width="100">
+            <img id="photo-preview" src="{% static 'images/default-profile.png' %}" alt="Default Profile Photo" style="width: 38px; height: 38px;">
+            <p>No photo added</p>
         {% endif %}
-        <input type="file" id="photo" name="photo" style="display:none;">  <!-- Hidden until editing -->
+        <input type="file" id="photo" name="photo" style="display:none;" onchange="displayPhotoName()">  <!-- Hidden until editing -->
+        <p id="photo-name"></p> <!-- Show file name when uploaded -->
     </div>
 
     <!-- Button to enable editing -->
@@ -79,6 +83,17 @@
         // Hide the edit button and show the save changes button
         document.getElementById('edit-btn').style.display = 'none';
         document.getElementById('save-changes-btn').style.display = 'block';
+    }
+
+    function displayPhotoName() {
+        var input = document.getElementById('photo');
+        var fileName = input.files[0].name;  // Get uploaded file name
+        document.getElementById('photo-name').textContent = fileName;  // Display file name
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('photo-preview').src = e.target.result;  // Update image preview
+        };
+        reader.readAsDataURL(input.files[0]);  // Read the uploaded file
     }
 
     function confirmPasswordChange() {
