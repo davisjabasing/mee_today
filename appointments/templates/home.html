@@ -7,11 +7,11 @@
     <div class="search-bar">
         <!-- Check if the user is authenticated -->
         {% if user.is_authenticated %}
-            <form method="POST">
+            <form method="POST" style="display: flex; gap: 10px;">
                 {% csrf_token %}
-                <input type="text" name="name" placeholder="Search by name">
-                <input type="text" name="profession" placeholder="Search by profession">
-                <input type="text" name="location" placeholder="Search by location">
+                <input type="text" name="name" placeholder="Search by name" style="flex: 1;">
+                <input type="text" name="profession" placeholder="Search by profession" style="flex: 1;">
+                <input type="text" name="location" placeholder="Search by location" style="flex: 1;">
                 <button type="submit">Search</button>
             </form>
         {% else %}
@@ -21,6 +21,13 @@
 
     {% if users %}
         <h3>Search Results</h3>
+        <!-- Display the search terms above the results -->
+        <p>Showing results for:
+            {% if name %}<strong>Name:</strong> {{ name }} {% endif %}
+            {% if profession %}<strong>Profession:</strong> {{ profession }} {% endif %}
+            {% if location %}<strong>Location:</strong> {{ location }} {% endif %}
+        </p>
+
         <div class="user-results">
             {% for user in users %}
                 <div class="user-box">
@@ -38,22 +45,33 @@
             {% endfor %}
         </div>
     {% else %}
-        <h3>No users found. Suggested Users:</h3>
-        <div class="user-results">
-            {% for user in suggested_users %}
-                <div class="user-box">
-                    <a href="{% url 'profile' user.user.id %}">
-                        {% if user.photo %}
-                            <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo" style="width: 38px; height: 38px;">
-                        {% else %}
-                            <img src="{% static 'images/pexels-pixabay-33045.jpg' %}" alt="Default photo" style="width: 38px; height: 38px;">
-                        {% endif %}
-                        <p>{{ user.user.username }}</p>
-                        <p>{{ user.profession }}</p>
-                        <p>{{ user.location }}</p>
-                    </a>
-                </div>
-            {% endfor %}
-        </div>
+        <!-- No users found message with search terms -->
+        <h3>No users found for:</h3>
+        <p>
+            {% if name %}<strong>Name:</strong> {{ name }}{% endif %}
+            {% if profession %}<strong> Profession:</strong> {{ profession }}{% endif %}
+            {% if location %}<strong> Location:</strong> {{ location }}{% endif %}
+        </p>
+
+        <!-- Suggested Users section -->
+        {% if suggested_users %}
+            <h3>Suggested Users:</h3>
+            <div class="user-results">
+                {% for user in suggested_users %}
+                    <div class="user-box">
+                        <a href="{% url 'profile' user.user.id %}">
+                            {% if user.photo %}
+                                <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo" style="width: 38px; height: 38px;">
+                            {% else %}
+                                <img src="{% static 'images/pexels-pixabay-33045.jpg' %}" alt="Default photo" style="width: 38px; height: 38px;">
+                            {% endif %}
+                            <p>{{ user.user.username }}</p>
+                            <p>{{ user.profession }}</p>
+                            <p>{{ user.location }}</p>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     {% endif %}
 {% endblock %}

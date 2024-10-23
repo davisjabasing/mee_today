@@ -60,9 +60,11 @@ def register_view(request):
     
     return render(request, 'register.html')
 
-
 # Home View (with Search functionality)
 def home_view(request):
+    name = profession = location = None
+    users = suggested_users = None
+
     if request.method == "POST":
         name = request.POST.get('name')
         profession = request.POST.get('profession')
@@ -77,22 +79,43 @@ def home_view(request):
         if location:
             users = users.filter(location__icontains=location)
 
-        # Fetch 2 random users if no results found
+        # If no users are found, get suggested users
         if not users.exists():
             all_users = UserProfile.objects.exclude(user=request.user)
             suggested_users = all_users.order_by('?')[:2]  # Fetch two random users
-
         else:
-            suggested_users = None  # No suggested users if search results found
+            suggested_users = None
 
-    else:
-        users = None
-        suggested_users = None
+        # Redirect after processing POST request to avoid re-submitting the form
+        return redirect(f'{request.path}?name={name}&profession={profession}&location={location}')
 
+    # Handle GET requests (after redirect)
+    if request.method == "GET":
+        name = request.GET.get('name')
+        profession = request.GET.get('profession')
+        location = request.GET.get('location')
+
+        if name or profession or location:
+            users = UserProfile.objects.all()
+            if name:
+                users = users.filter(user__username__icontains=name)
+            if profession:
+                users = users.filter(profession__icontains=profession)
+            if location:
+                users = users.filter(location__icontains=location)
+
+            if not users.exists():
+                all_users = UserProfile.objects.exclude(user=request.user)
+                suggested_users = all_users.order_by('?')[:2]
+    
     context = {
         'users': users,
         'suggested_users': suggested_users,
+        'name': name,
+        'profession': profession,
+        'location': location,
     }
+
     return render(request, 'home.html', context)
 
 # Profile View
@@ -299,7 +322,6 @@ def edit_profile(request):
         'user': request.user,
         'profile': profile
     })
-
 
 def change_password(request):
     if request.method == 'POST':
