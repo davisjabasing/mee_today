@@ -70,8 +70,8 @@ def home_view(request):
         profession = request.POST.get('profession')
         location = request.POST.get('location')
 
+        # Filter users based on search terms
         users = UserProfile.objects.all()
-
         if name:
             users = users.filter(user__username__icontains=name)
         if profession:
@@ -79,21 +79,20 @@ def home_view(request):
         if location:
             users = users.filter(location__icontains=location)
 
-        # If no users are found, get suggested users
+        # Get suggested users if no results are found
         if not users.exists():
-            all_users = UserProfile.objects.exclude(user=request.user)
-            suggested_users = all_users.order_by('?')[:2]  # Fetch two random users
+            suggested_users = UserProfile.objects.exclude(user=request.user).order_by('?')[:2]
         else:
             suggested_users = None
 
-        # Redirect after processing POST request to avoid re-submitting the form
+        # Stay on the same page but pass search results to the GET method
         return redirect(f'{request.path}?name={name}&profession={profession}&location={location}')
 
-    # Handle GET requests (after redirect)
+    # Handle GET request (after the redirect)
     if request.method == "GET":
-        name = request.GET.get('name')
-        profession = request.GET.get('profession')
-        location = request.GET.get('location')
+        name = request.GET.get('name', '')
+        profession = request.GET.get('profession', '')
+        location = request.GET.get('location', '')
 
         if name or profession or location:
             users = UserProfile.objects.all()
@@ -105,13 +104,12 @@ def home_view(request):
                 users = users.filter(location__icontains=location)
 
             if not users.exists():
-                all_users = UserProfile.objects.exclude(user=request.user)
-                suggested_users = all_users.order_by('?')[:2]
-    
+                suggested_users = UserProfile.objects.exclude(user=request.user).order_by('?')[:2]
+
     context = {
         'users': users,
         'suggested_users': suggested_users,
-        'name': name,
+        'name': name,  # Pass the search terms back to the template
         'profession': profession,
         'location': location,
     }
