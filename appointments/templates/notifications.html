@@ -2,85 +2,159 @@
 {% block content %}
 <h2>Notifications</h2>
 
-<!-- Section for Received Appointments (Pending) -->
-<div class="notification-box">
-    <h3>Received Appointment Requests</h3>
-    <ul>
-        {% for appointment in received_pending_appointments %}
-            <li>
-                Appointment request from {{ appointment.requester.username }} on {{ appointment.date }}:
-                <form action="{% url 'accept_appointment' appointment.id %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit">Accept</button>
-                </form>
-                <form action="{% url 'reject_appointment' appointment.id %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit">Reject</button>
-                </form>
-                <form action="{% url 'modify_appointment' appointment.id %}" method="GET">
-                    <button type="submit">Modify</button>
-                </form>
+<div class="notification-container">
+    <!-- Section for Received Appointment Requests (Pending) -->
+    <div class="notification-section">
+        <h3>Received Appointment Requests</h3>
+        <ul>
+            {% for appointment in received_pending_appointments %}
+            <li class="notification-item">
+                <div class="appointment-info">
+                    Appointment request from <strong>{{ appointment.requester.username }}</strong> on <strong>{{ appointment.date }}</strong>:
+                </div>
+                <div class="appointment-actions">
+                    <form action="{% url 'accept_appointment' appointment.id %}" method="POST" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Accept</button>
+                    </form>
+                    <form action="{% url 'reject_appointment' appointment.id %}" method="POST" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                    <form action="{% url 'modify_appointment' appointment.id %}" method="GET" class="inline-form">
+                        <button type="submit" class="btn btn-warning">Modify</button>
+                    </form>
+                </div>
             </li>
-        {% empty %}
+            {% empty %}
             <li>No received appointment requests.</li>
-        {% endfor %}
-    </ul>
-</div>
+            {% endfor %}
+        </ul>
+    </div>
 
-<!-- Section for Accepted Appointments (For recipient - y) -->
-<div class="notification-box">
-    <h3>Accepted Appointment Requests</h3>
-    <ul>
-        {% for appointment in received_accepted_appointments %}
-            <li>
-                You accepted an appointment request from {{ appointment.requester.username }} on {{ appointment.date }}.
+    <!-- Section for Accepted Appointments (For recipient) -->
+    <div class="notification-section">
+        <h3>Accepted Appointment Requests</h3>
+        <ul>
+            {% for appointment in received_accepted_appointments %}
+            <li class="notification-item">
+                You accepted an appointment request from <strong>{{ appointment.requester.username }}</strong> on <strong>{{ appointment.date }}</strong>.
             </li>
-        {% empty %}
+            {% empty %}
             <li>No accepted appointment requests.</li>
-        {% endfor %}
-    </ul>
-</div>
+            {% endfor %}
+        </ul>
+    </div>
 
-<!-- Section for Rejected Appointments (For recipient - y) -->
-<div class="notification-box">
-    <h3>Rejected Appointment Requests</h3>
-    <ul>
-        {% for appointment in received_rejected_appointments %}
-            <li>
-                You rejected an appointment request from {{ appointment.requester.username }} on {{ appointment.date }}.
+    <!-- Section for Rejected Appointments (For recipient) -->
+    <div class="notification-section">
+        <h3>Rejected Appointment Requests</h3>
+        <ul>
+            {% for appointment in received_rejected_appointments %}
+            <li class="notification-item">
+                You rejected an appointment request from <strong>{{ appointment.requester.username }}</strong> on <strong>{{ appointment.date }}</strong>.
             </li>
-        {% empty %}
+            {% empty %}
             <li>No rejected appointment requests.</li>
-        {% endfor %}
-    </ul>
-</div>
+            {% endfor %}
+        </ul>
+    </div>
 
-<!-- Section for Sent Appointments (Pending) -->
-<div class="notification-box">
-    <h3>Sent Appointment Requests</h3>
-    <ul>
-        {% for appointment in sent_pending_appointments %}
-            <li>
-                You sent an appointment request to {{ appointment.recipient.username }} on {{ appointment.date }}. Status: {{ appointment.status }}
+    <!-- Section for Sent Appointment Requests (Pending) -->
+    <div class="notification-section">
+        <h3>Sent Appointment Requests</h3>
+        <ul>
+            {% for appointment in sent_pending_appointments %}
+            <li class="notification-item">
+                You sent an appointment request to <strong>{{ appointment.recipient.username }}</strong> on <strong>{{ appointment.date }}</strong>. Status: <strong>{{ appointment.status }}</strong>.
             </li>
-        {% empty %}
+            {% empty %}
             <li>No sent appointment requests.</li>
-        {% endfor %}
-    </ul>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Section for Cancelled Appointments (For requester) -->
+    <div class="notification-section">
+        <h3>Cancelled Appointment Requests</h3>
+        <ul>
+            {% for appointment in sent_cancelled_appointments %}
+            <li class="notification-item">
+                Your appointment request to <strong>{{ appointment.recipient.username }}</strong> was cancelled.
+            </li>
+            {% empty %}
+            <li>No cancelled appointment requests.</li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 
-<!-- Section for Cancelled Appointments (For requester - x) -->
-<div class="notification-box">
-    <h3>Cancelled Appointment Requests</h3>
-    <ul>
-        {% for appointment in sent_cancelled_appointments %}
-            <li>
-                Your appointment request to {{ appointment.recipient.username }} was cancelled.
-            </li>
-        {% empty %}
-            <li>No cancelled appointment requests.</li>
-        {% endfor %}
-    </ul>
-</div>
+<style>
+.notification-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.notification-section {
+    flex: 1;
+    min-width: 300px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.notification-section h3 {
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.inline-form {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.btn {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border-radius: 5px;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: #fff;
+    border: none;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+</style>
 
 {% endblock %}

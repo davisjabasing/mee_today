@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from .models import UserProfile, Appointment
+from .models import CalendarEvent, UserProfile, Appointment
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
+import datetime
+
 
 # Login View
 def login_view(request):
@@ -117,19 +119,47 @@ def home_view(request):
     return render(request, 'home.html', context)
 
 # Profile View
+@login_required
 def profile_view(request, user_id):
     user_profile = UserProfile.objects.get(user_id=user_id)
+    
     if request.method == 'POST':
         reason = request.POST.get('reason')
         date = request.POST.get('date')
+        time_period = request.POST.get('time_period')
+
+        # Parse the date correctly using datetime.datetime.strptime
+        start_time = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M')
+
+        # Default end_time in case no time_period is selected
+        end_time = start_time
+
+        # Determine the end time based on the time_period selected by the user
+        if time_period == '15':
+            end_time = start_time + datetime.timedelta(minutes=15)
+        elif time_period == '30':
+            end_time = start_time + datetime.timedelta(minutes=30)
+        elif time_period == '45':
+            end_time = start_time + datetime.timedelta(minutes=45)
+        elif time_period == '60':
+            end_time = start_time + datetime.timedelta(minutes=60)
+        elif time_period == 'full_day':
+            end_time = start_time + datetime.timedelta(hours=24)
+        else:
+            # If the time_period is invalid or missing, we could log this or return an error
+            print("Invalid or missing time_period. Defaulting end_time to start_time.")
+        
+        # Save the appointment with the calculated time
         Appointment.objects.create(
-            requester=request.user, 
-            recipient=user_profile.user, 
-            date=date, 
-            reason=reason, 
+            requester=request.user,
+            recipient=user_profile.user,
+            date=start_time,
+            end_time=end_time,  # End time will always have a value now
+            reason=reason,
             status='pending'
         )
         return redirect('home')
+    
     return render(request, 'profile.html', {'profile': user_profile})
 
 # Calendar View
@@ -168,10 +198,19 @@ def notifications(request):
 @login_required
 def accept_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
+
     if request.method == 'POST' and appointment.recipient == request.user:
+        # Update the status of the appointment to 'accepted'
         appointment.status = 'accepted'
         appointment.save()
+
+        # Update both calendars by creating events for both users
+        CalendarEvent.objects.create(user=appointment.requester, appointment=appointment)
+        CalendarEvent.objects.create(user=appointment.recipient, appointment=appointment)
+        
         return redirect('notifications')
+
+    return redirect('notifications')
 
 @login_required
 def reject_appointment(request, appointment_id):

@@ -11,6 +11,17 @@
         <h3>Request an Appointment</h3>
         <textarea name="reason" placeholder="Reason for appointment" required></textarea>
         <input type="datetime-local" name="date" required>
+        
+        <!-- New dropdown to select time period -->
+        <label for="duration">Select Duration:</label>
+        <select name="duration" required>
+            <option value="15">15 mins</option>
+            <option value="30">30 mins</option>
+            <option value="45">45 mins</option>
+            <option value="60">1 hour</option>
+            <option value="1440">Full day</option>
+        </select>
+
         <button type="submit">Request Appointment</button>
     </form>
 {% endblock %}

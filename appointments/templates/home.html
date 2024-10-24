@@ -21,13 +21,6 @@
     </div>
 
     {% if users %}
-        <h3>Search Results</h3>
-        <!-- <p>Showing results for:
-            {% if name %}<strong>Name:</strong> {{ name }} {% endif %}
-            {% if profession %}<strong>Profession:</strong> {{ profession }} {% endif %}
-            {% if location %}<strong>Location:</strong> {{ location }} {% endif %}
-        </p> -->
-
         <div class="user-results">
             {% for user in users %}
                 <div class="user-box">
@@ -46,11 +39,6 @@
         </div>
     {% else %}
         <h3>No users found</h3>
-        <!-- <p>
-            {% if name %}<strong>Name:</strong> {{ name }} {% endif %}
-            {% if profession %}<strong>Profession:</strong> {{ profession }} {% endif %}
-            {% if location %}<strong>Location:</strong> {{ location }} {% endif %}
-        </p> -->
     {% endif %}
 
     <!-- Suggested Users Section -->

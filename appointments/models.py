@@ -25,6 +25,7 @@ class Appointment(models.Model):
     requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_requests')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_requests')
     date = models.DateTimeField()
+    end_time = models.DateTimeField()  # New field for the end time
     reason = models.TextField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
@@ -36,3 +37,7 @@ class Notification(models.Model):
     message = models.TextField()
     is_read = models.BooleanField(default=False)
 
+class CalendarEvent(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
