@@ -26,9 +26,15 @@ urlpatterns = [
 
 
 
-    path('notifications/', views.notifications, name='notifications'),
-    path('appointment/<int:appointment_id>/accept/', views.accept_appointment, name='accept_appointment'),
-    path('appointment/<int:appointment_id>/reject/', views.reject_appointment, name='reject_appointment'),
-    path('appointment/<int:appointment_id>/modify/', views.modify_appointment, name='modify_appointment'),
+    # path('notifications/', views.Notification, name='notifications'),
+    # path('appointment/<int:appointment_id>/accept/', views.accept_appointment, name='accept_appointment'),
+    # path('appointment/<int:appointment_id>/reject/', views.reject_appointment, name='reject_appointment'),
+    # path('appointment/<int:appointment_id>/modify/', views.modify_appointment, name='modify_appointment'),
     
+
+
+    path('profile/<int:user_id>/', views.profile_view, name='profile'),
+    path('notifications/', views.notifications_view, name='notifications'),
+    path('handle_request/<int:appointment_id>/', views.handle_request, name='handle_request'),
+    path('modify_appointment/<int:appointment_id>/', views.modify_appointment, name='modify_appointment'),
 ]

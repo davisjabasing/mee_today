@@ -1,0 +1,15 @@
+1. register page:- need to add a proper details like separate the address and add pincode and city.
+2. in the edit profile page, for every option like name, profession, address, age, city, pincode. add a pencil and a tick option. If i click the pencil icon, that field need to be comes under editable option and after editing if i press the tick icon, save that change temporarily and finally if i press save changes, that temporary changes need to save in the database.
+3. (Consider user A and user B). 
+    Scenario:
+    1   if A sending request to be B, in user B notifications.html page, in the receied request section, show the request send by A along with date and time and also reason. create 3 buttons (Accept, Modify and Cancel).
+        . If B accepted the Request of A, show "Hi {A}, You have an Appointment with {B} on {Date and Time} for {Reason}" for both A and B notifications.
+        . If B Cancelled the request of A, show "Hi {A}, your Appointment with {B} has cancelled" for user A Notification and "Hi {B}, You Cancelled the Appointment with user {A}" for user B notification.
+        . If B wants to Modify the request of A, then B needs to select new Date and Time and also the reason. After Modifiying, send a request back to the user A in the appointment section, show "Your Appointment is Modified by {B} to {Modified Time and Date} for {Reason for Modification}.". If A clicked the modified appointment from B, show 2 options like Accept and Cancel. If accept is pressed, send this appointment request to Accepted request and cancel is pressed, send this to cancelled category.
+
+
+
+
+
+
+

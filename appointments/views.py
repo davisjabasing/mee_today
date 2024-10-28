@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from .models import CalendarEvent, UserProfile, Appointment
+from .models import UserProfile, Appointment, Notification
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 import datetime
-
+from django.utils import timezone
+from django.db.models import Q
 
 # Login View
 def login_view(request):
@@ -122,45 +123,99 @@ def home_view(request):
 @login_required
 def profile_view(request, user_id):
     user_profile = UserProfile.objects.get(user_id=user_id)
+    received_requests = Appointment.objects.filter(recipient=request.user, status='pending')
     
     if request.method == 'POST':
         reason = request.POST.get('reason')
         date = request.POST.get('date')
-        time_period = request.POST.get('time_period')
+        duration = request.POST.get('duration')
 
-        # Parse the date correctly using datetime.datetime.strptime
         start_time = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M')
+        end_time = start_time + datetime.timedelta(minutes=int(duration))
 
-        # Default end_time in case no time_period is selected
-        end_time = start_time
-
-        # Determine the end time based on the time_period selected by the user
-        if time_period == '15':
-            end_time = start_time + datetime.timedelta(minutes=15)
-        elif time_period == '30':
-            end_time = start_time + datetime.timedelta(minutes=30)
-        elif time_period == '45':
-            end_time = start_time + datetime.timedelta(minutes=45)
-        elif time_period == '60':
-            end_time = start_time + datetime.timedelta(minutes=60)
-        elif time_period == 'full_day':
-            end_time = start_time + datetime.timedelta(hours=24)
-        else:
-            # If the time_period is invalid or missing, we could log this or return an error
-            print("Invalid or missing time_period. Defaulting end_time to start_time.")
-        
-        # Save the appointment with the calculated time
         Appointment.objects.create(
             requester=request.user,
             recipient=user_profile.user,
             date=start_time,
-            end_time=end_time,  # End time will always have a value now
+            end_time=end_time,
             reason=reason,
             status='pending'
         )
         return redirect('home')
     
-    return render(request, 'profile.html', {'profile': user_profile})
+    return render(request, 'profile.html', {'profile': user_profile, 'received_requests': received_requests})
+
+@login_required
+def notifications_view(request):
+    received_requests = Appointment.objects.filter(recipient=request.user, status='pending')
+    accepted_appointments = Appointment.objects.filter(
+        (Q(recipient=request.user) | Q(requester=request.user)) & Q(status='accepted')
+    )
+    cancelled_appointments = Appointment.objects.filter(
+        (Q(recipient=request.user) | Q(requester=request.user)) & Q(status='rejected')
+    )
+    completed_appointments = Appointment.objects.filter(
+        (Q(recipient=request.user) | Q(requester=request.user)) & Q(date__lt=timezone.now()) & Q(status='accepted')
+    )
+    notifications = Notification.objects.filter(user=request.user)
+    
+    context = {
+        'received_requests': received_requests,
+        'accepted_appointments': accepted_appointments,
+        'cancelled_appointments': cancelled_appointments,
+        'completed_appointments': completed_appointments,
+        'notifications': notifications,
+        'user': request.user,
+    }
+    return render(request, 'notifications.html', context)
+
+@login_required
+def handle_request(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    action = request.POST.get('action')
+
+    if action == 'accept':
+        appointment.status = 'accepted'
+        appointment.save()
+        # Notify both users
+        Notification.objects.create(user=appointment.requester, message=f"Hi {appointment.requester.username}, You have an Appointment with {appointment.recipient.username} on {appointment.date} for {appointment.reason}")
+        Notification.objects.create(user=appointment.recipient, message=f"Hi {appointment.recipient.username}, You have an Appointment with {appointment.requester.username} on {appointment.date} for {appointment.reason}")
+    elif action == 'cancel':
+        appointment.status = 'rejected'
+        appointment.save()
+        # Notify both users
+        Notification.objects.create(user=appointment.requester, message=f"Hi {appointment.requester.username}, your Appointment with {appointment.recipient.username} has been cancelled")
+        Notification.objects.create(user=appointment.recipient, message=f"Hi {appointment.recipient.username}, You cancelled the Appointment with {appointment.requester.username}")
+    elif action == 'modify':
+        # Redirect to a modification form
+        return redirect('modify_appointment', appointment_id=appointment.id)
+
+    return redirect('notifications')
+
+@login_required
+def modify_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    if request.method == 'POST':
+        new_date = request.POST.get('date')
+        new_reason = request.POST.get('reason')
+        duration = request.POST.get('duration')
+
+        new_start_time = datetime.datetime.strptime(new_date, '%Y-%m-%dT%H:%M')
+        new_end_time = new_start_time + datetime.timedelta(minutes=int(duration))
+
+        appointment.date = new_start_time
+        appointment.end_time = new_end_time
+        appointment.reason = new_reason
+        appointment.status = 'modified'
+        appointment.save()
+
+        # Notify the requester
+        Notification.objects.create(user=appointment.requester, message=f"Your Appointment is Modified by {appointment.recipient.username} to {new_start_time} for {new_reason}.")
+        return redirect('notifications')
+
+    return render(request, 'modify_appointment.html', {'appointment': appointment})
+
 
 # Calendar View
 @login_required
@@ -168,97 +223,6 @@ def calendar_view(request):
     # Get only accepted appointments
     appointments = Appointment.objects.filter(recipient=request.user, status='accepted')
     return render(request, 'view_calendar.html', {'appointments': appointments})
-
-@login_required
-def notifications(request):
-    user = request.user
-
-    # Pending appointments
-    received_pending_appointments = Appointment.objects.filter(recipient=user, status='pending')
-    sent_pending_appointments = Appointment.objects.filter(requester=user, status='pending')
-
-    # Accepted appointments
-    received_accepted_appointments = Appointment.objects.filter(recipient=user, status='accepted')
-    sent_accepted_appointments = Appointment.objects.filter(requester=user, status='accepted')
-
-    # Rejected appointments
-    received_rejected_appointments = Appointment.objects.filter(recipient=user, status='rejected')
-    sent_cancelled_appointments = Appointment.objects.filter(requester=user, status='rejected')
-
-    context = {
-        'received_pending_appointments': received_pending_appointments,
-        'sent_pending_appointments': sent_pending_appointments,
-        'received_accepted_appointments': received_accepted_appointments,
-        'sent_accepted_appointments': sent_accepted_appointments,
-        'received_rejected_appointments': received_rejected_appointments,
-        'sent_cancelled_appointments': sent_cancelled_appointments,
-    }
-    return render(request, 'notifications.html', context)
-
-@login_required
-def accept_appointment(request, appointment_id):
-    appointment = get_object_or_404(Appointment, id=appointment_id)
-
-    if request.method == 'POST' and appointment.recipient == request.user:
-        # Update the status of the appointment to 'accepted'
-        appointment.status = 'accepted'
-        appointment.save()
-
-        # Update both calendars by creating events for both users
-        CalendarEvent.objects.create(user=appointment.requester, appointment=appointment)
-        CalendarEvent.objects.create(user=appointment.recipient, appointment=appointment)
-        
-        return redirect('notifications')
-
-    return redirect('notifications')
-
-@login_required
-def reject_appointment(request, appointment_id):
-    # Get the appointment object
-    appointment = get_object_or_404(Appointment, id=appointment_id)
-
-    # Check if the current user is the recipient (y) who can reject the request
-    if appointment.recipient == request.user:
-        # Update the status to 'rejected'
-        appointment.status = 'rejected'
-        appointment.save()
-        
-        # Notify the requester (x) that their appointment was rejected
-        messages.success(request, "Appointment request rejected.")
-        return redirect('notifications')  # Adjust this redirect as needed
-    else:
-        # If the user is not authorized to reject, show an error
-        messages.error(request, "You are not authorized to reject this appointment.")
-        return redirect('notifications')
-
-@login_required
-def modify_appointment(request, appointment_id):
-    # Retrieve the appointment
-    appointment = get_object_or_404(Appointment, id=appointment_id, recipient=request.user)
-
-    if request.method == 'POST':
-        # Process the form submission (modification)
-        new_date = request.POST.get('new_date')
-        new_reason = request.POST.get('new_reason')
-
-        if new_date and new_reason:
-            # Update the appointment with new values
-            appointment.date = new_date
-            appointment.reason = new_reason
-            appointment.status = 'modified'
-            appointment.save()
-
-            # Redirect to notifications or any page after modification
-            return redirect('notifications')
-        else:
-            return render(request, 'modify_appointment.html', {'appointment': appointment, 'error': 'All fields are required.'})
-
-    # For GET requests, display the modification form
-    return render(request, 'modify_appointment.html', {'appointment': appointment})
-
-def notify_user(user, message):
-    # Here, implement a notification system to notify the user (e.g., saving notifications in a model)
-    pass
 
 def logout_view(request):
     logout(request)
