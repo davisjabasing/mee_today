@@ -220,9 +220,29 @@ def modify_appointment(request, appointment_id):
 # Calendar View
 @login_required
 def calendar_view(request):
-    # Get only accepted appointments
-    appointments = Appointment.objects.filter(recipient=request.user, status='accepted')
+    # Get accepted, cancelled, and pending appointments
+    appointments = Appointment.objects.filter(
+        Q(recipient=request.user) | Q(requester=request.user),
+        status__in=['accepted', 'rejected', 'pending']
+    )
+
+    # Add color logic
+    for appointment in appointments:
+        if appointment.status == 'rejected':
+            appointment.color = 'red'
+        elif appointment.status == 'pending':
+            appointment.color = 'orange'
+        else:
+            appointment.color = 'blue'
+
     return render(request, 'view_calendar.html', {'appointments': appointments})
+
+@login_required
+def delete_event(request, event_id):
+    if request.method == 'POST':
+        appointment = Appointment.objects.get(id=event_id)
+        appointment.delete()
+        return redirect('calendar')
 
 def logout_view(request):
     logout(request)

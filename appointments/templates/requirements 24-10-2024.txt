@@ -7,9 +7,10 @@
         . If B Cancelled the request of A, show "Hi {A}, your Appointment with {B} has cancelled" for user A Notification and "Hi {B}, You Cancelled the Appointment with user {A}" for user B notification.
         . If B wants to Modify the request of A, then B needs to select new Date and Time and also the reason. After Modifiying, send a request back to the user A in the appointment section, show "Your Appointment is Modified by {B} to {Modified Time and Date} for {Reason for Modification}.". If A clicked the modified appointment from B, show 2 options like Accept and Cancel. If accept is pressed, send this appointment request to Accepted request and cancel is pressed, send this to cancelled category.
 
-
-
-
+4. Calendar
+    Scenario: (Consider user A and user B)
+    . If A send a request to B and B accepted, show this Upcoming Appointment in the calender. Eg: if a selected the date as 25-12-2024 and time 3:00 pm, block this timings in the calendar.If A selected 15 mins as the time slot, bok the calendar for 15 mins. if 30, block 30 mins in the calendar.
+    . If B cancelled the request from A, Block the calendar for that tie period with red color time slot.
 
 
 
