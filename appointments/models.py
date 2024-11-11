@@ -1,18 +1,47 @@
+from datetime import date
+from django.db import models
+from django.contrib.auth.models import User
+
 from django.db import models
 from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
+    # Link to the Django User model (one-to-one relationship)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profession = models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
+    
+    # Basic Details
+    phone_number = models.CharField(max_length=15, unique=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    sex = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female')])
+    age = models.IntegerField(null=True, blank=True)  # Calculated from date_of_birth
+    
+    # Communication Details
+    address = models.TextField()
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    district = models.CharField(max_length=100)
+    pincode = models.CharField(max_length=10)
+    
+    # Professional Details
+    profession = models.CharField(max_length=20, choices=[('Student', 'Student'), ('Professional', 'Professional')])
+    designation = models.CharField(max_length=100, blank=True)  # Only for professionals
+    company = models.CharField(max_length=100, blank=True)      # Only for professionals
+    university = models.CharField(max_length=100, blank=True)   # Only for students
+    field_of_study = models.CharField(max_length=100, blank=True)  # Only for students
     description = models.TextField(blank=True)
-    phone_number = models.CharField(max_length=15)  # Phone number
-    photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)  # Photo field
-    sex = models.CharField(max_length=10)
-    age = models.IntegerField(null=True, blank=True)  # New age field
+    
+    # Optional Profile Photo
+    photo = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        # Calculate age based on date_of_birth, if provided
+        if self.date_of_birth:
+            self.age = date.today().year - self.date_of_birth.year
+        super(UserProfile, self).save(*args, **kwargs)
+    
     def __str__(self):
-        return self.user.username
+        return f"{self.user.username}'s profile"
+
 
 class Appointment(models.Model):
     STATUS_CHOICES = [

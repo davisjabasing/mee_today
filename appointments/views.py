@@ -6,11 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
-import datetime
+from datetime import datetime
 from django.utils import timezone
 from django.db.models import Q
 
-# Login View
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -23,39 +23,57 @@ def login_view(request):
             return render(request, 'login.html', {'error': 'Invalid credentials'})
     return render(request, 'login.html')
 
-# Register View
 def register_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         name = request.POST.get('name')
         profession = request.POST.get('profession')
-        location = request.POST.get('location')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        state = request.POST.get('state')
+        district = request.POST.get('district')
+        pincode = request.POST.get('pincode')
+        designation = request.POST.get('designation', '')
+        company = request.POST.get('company', '')
+        university = request.POST.get('university', '')
+        field_of_study = request.POST.get('field_of_study', '')
         description = request.POST.get('description', '')
         phone_number = request.POST.get('phone_number')
-        age = request.POST.get('age')  # Age field
+        date_of_birth_str = request.POST.get('date_of_birth')  # Receive date_of_birth as string
+        sex = request.POST.get('sex')
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_confirm')
-        photo = request.FILES.get('photo')  # Handle photo upload
+        photo = request.FILES.get('photo')
+
+        # Convert date_of_birth string to a date object
+        try:
+            date_of_birth = datetime.strptime(date_of_birth_str, '%Y-%m-%d').date()  # Adjust format if necessary
+        except ValueError:
+            return render(request, 'register.html', {'error': "Invalid Date of Birth format"})
 
         if password != password_confirm:
             return render(request, 'register.html', {'error': "Passwords do not match"})
         
         try:
-            # Create the User object
             user = User.objects.create_user(username=username, password=password, first_name=name)
-            
-            # Create the UserProfile object and save additional details
             user_profile = UserProfile.objects.create(
                 user=user,
                 profession=profession,
-                location=location,
-                description=description,
                 phone_number=phone_number,
-                age=age,  # Save the age
-                photo=photo  # Save the photo
+                date_of_birth=date_of_birth,  # Now date_of_birth is a date object
+                sex=sex,
+                address=address,
+                city=city,
+                state=state,
+                district=district,
+                pincode=pincode,
+                designation=designation,
+                company=company,
+                university=university,
+                field_of_study=field_of_study,
+                description=description,
+                photo=photo
             )
-            
-            # Automatically log in the user after successful registration
             login(request, user)
             return redirect('home')
         except Exception as e:
@@ -63,7 +81,6 @@ def register_view(request):
     
     return render(request, 'register.html')
 
-# Home View (with Search functionality)
 def home_view(request):
     name = profession = location = None
     users = suggested_users = None
@@ -119,7 +136,81 @@ def home_view(request):
 
     return render(request, 'home.html', context)
 
-# Profile View
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+def check_username(request):
+    username = request.GET.get('username', None)
+    data = {
+        'is_taken': User.objects.filter(username__iexact=username).exists()
+    }
+    return JsonResponse(data)
+
+def forgot_password_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        phone_number = request.POST.get('phone_number')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # Check if passwords match
+        if new_password != confirm_password:
+            return render(request, 'forgot_password.html', {'error': 'Passwords do not match'})
+        
+        try:
+            # Get the user and check phone number
+            user = User.objects.get(username=username)
+            user_profile = UserProfile.objects.get(user=user)
+
+            if user_profile.phone_number == phone_number:
+                # Update the user's password if the phone number matches
+                user.password = make_password(new_password)
+                user.save()
+                return redirect('login')  # Redirect to login after successful password reset
+            else:
+                return render(request, 'forgot_password.html', {'error': 'Username or phone number incorrect'})
+
+        except User.DoesNotExist:
+            return render(request, 'forgot_password.html', {'error': 'Username or phone number incorrect'})
+    
+    return render(request, 'forgot_password.html')
+
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        user = request.user
+
+        # Check if current password is correct
+        if not user.check_password(current_password):
+            messages.error(request, "Current password is incorrect. Please try again.")
+            return redirect('edit_profile')
+
+        # Check if new password and confirm password match
+        if new_password != confirm_password:
+            messages.error(request, "New passwords do not match. Please try again.")
+            return redirect('edit_profile')
+
+        # If everything is correct, show a confirmation prompt
+        if request.POST.get('confirm_change') == 'yes':  # Assuming 'confirm_change' holds the value from the prompt
+            # Change the password and update the session
+            user.set_password(new_password)
+            user.save()
+            update_session_auth_hash(request, user)  # Prevents logout after password change
+
+            # Show success message
+            messages.success(request, "Password changed successfully.")
+            return redirect('edit_profile')
+
+        # If the user cancels the password change
+        messages.info(request, "Password change cancelled.")
+        return redirect('edit_profile')
+
+    return render(request, 'edit_profile.html')
+
 @login_required
 def profile_view(request, user_id):
     user_profile = UserProfile.objects.get(user_id=user_id)
@@ -216,8 +307,6 @@ def modify_appointment(request, appointment_id):
 
     return render(request, 'modify_appointment.html', {'appointment': appointment})
 
-
-# Calendar View
 @login_required
 def calendar_view(request):
     # Get accepted, cancelled, and pending appointments
@@ -244,9 +333,7 @@ def delete_event(request, event_id):
         appointment.delete()
         return redirect('calendar')
 
-def logout_view(request):
-    logout(request)
-    return redirect('login')  # Redirect to the login page after logout
+  # Redirect to the login page after logout
 
 @login_required
 def view_calendar(request):
@@ -271,42 +358,6 @@ def handle_appointment_status(request):
             return redirect('notifications')
         else:
             return redirect('home')
-        
-def check_username(request):
-    username = request.GET.get('username', None)
-    data = {
-        'is_taken': User.objects.filter(username__iexact=username).exists()
-    }
-    return JsonResponse(data)
-
-def forgot_password_view(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        phone_number = request.POST.get('phone_number')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-
-        # Check if passwords match
-        if new_password != confirm_password:
-            return render(request, 'forgot_password.html', {'error': 'Passwords do not match'})
-        
-        try:
-            # Get the user and check phone number
-            user = User.objects.get(username=username)
-            user_profile = UserProfile.objects.get(user=user)
-
-            if user_profile.phone_number == phone_number:
-                # Update the user's password if the phone number matches
-                user.password = make_password(new_password)
-                user.save()
-                return redirect('login')  # Redirect to login after successful password reset
-            else:
-                return render(request, 'forgot_password.html', {'error': 'Username or phone number incorrect'})
-
-        except User.DoesNotExist:
-            return render(request, 'forgot_password.html', {'error': 'Username or phone number incorrect'})
-    
-    return render(request, 'forgot_password.html')
 
 @login_required
 def edit_profile(request):
@@ -344,38 +395,5 @@ def edit_profile(request):
         'profile': profile
     })
 
-def change_password(request):
-    if request.method == 'POST':
-        current_password = request.POST.get('current_password')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
 
-        user = request.user
-
-        # Check if current password is correct
-        if not user.check_password(current_password):
-            messages.error(request, "Current password is incorrect. Please try again.")
-            return redirect('edit_profile')
-
-        # Check if new password and confirm password match
-        if new_password != confirm_password:
-            messages.error(request, "New passwords do not match. Please try again.")
-            return redirect('edit_profile')
-
-        # If everything is correct, show a confirmation prompt
-        if request.POST.get('confirm_change') == 'yes':  # Assuming 'confirm_change' holds the value from the prompt
-            # Change the password and update the session
-            user.set_password(new_password)
-            user.save()
-            update_session_auth_hash(request, user)  # Prevents logout after password change
-
-            # Show success message
-            messages.success(request, "Password changed successfully.")
-            return redirect('edit_profile')
-
-        # If the user cancels the password change
-        messages.info(request, "Password change cancelled.")
-        return redirect('edit_profile')
-
-    return render(request, 'edit_profile.html')
 

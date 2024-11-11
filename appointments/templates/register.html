@@ -1,49 +1,165 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Register</h2>
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
+<h2>Register</h2>
+
+{% if error %}
+    <p class="error">{{ error }}</p>
+{% endif %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Section 1: Basic Details -->
+    <div id="section-basic" class="form-section">
+        <h3>Basic Information</h3>
+        
         <input type="text" id="username" name="username" placeholder="Username" required>
         <span id="username-feedback"></span>
+        
         <input type="text" name="name" placeholder="Full Name" required>
-        <input type="text" name="profession" placeholder="Profession" required>
-        <input type="text" name="location" placeholder="Location" required>
-        <textarea name="description" placeholder="Describe yourself (optional)"></textarea>
-        <input type="text" name="phone_number" placeholder="Phone Number" required>  
-        <input type="number" name="age" placeholder="Age" required>
-        <input type="file" name="photo" accept="image/*">  <!-- Photo upload field -->
+        <input type="email" name="email" placeholder="Email (optional)">
+        <input type="text" name="phone_number" placeholder="Phone Number" required>
+        
+        <label for="date_of_birth">Date of Birth</label>
+        <input type="date" name="date_of_birth" required>
+        
+        <label for="sex">Sex</label>
+        <select name="sex" required>
+            <option value="">Select Sex</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+        
+        <button type="button" onclick="showSection('section-communication')">Next</button>
+    </div>
+    
+    <!-- Section 2: Communication Details -->
+    <div id="section-communication" class="form-section" style="display:none;">
+        <h3>Communication Details</h3>
+        
+        <input type="text" name="address" placeholder="Address" required>
+        <input type="text" name="city" placeholder="City" required>
+        
+        <label for="state">State</label>
+        <select name="state" required>
+            <option value="">Select State</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Sikkim">Sikkim</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+            <option value="Lakshadweep">Lakshadweep</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Puducherry">Puducherry</option>
+        </select>
+        
+        <input type="text" name="district" placeholder="District" required>
+        <input type="text" name="pincode" placeholder="Pincode" required>
+        
+        <button type="button" onclick="showSection('section-basic')">Back</button>
+        <button type="button" onclick="showSection('section-professional')">Next</button>
+    </div>
+    
+    <!-- Section 3: Professional Section -->
+    <div id="section-professional" class="form-section" style="display:none;">
+        <h3>Professional Details</h3>
+        
+        <label for="profession">Profession</label>
+        <select name="profession" id="profession" required>
+            <option value="">Select Profession</option>
+            <option value="Student">Student</option>
+            <option value="Professional">Professional</option>
+        </select>
+        
+        <input type="text" id="designation" name="designation" placeholder="Designation" style="display:none;">
+        <input type="text" id="company" name="company" placeholder="Company" style="display:none;">
+        
+        <textarea name="description" placeholder="Description (optional)"></textarea>
+        
         <input type="password" name="password" placeholder="Password" required>
         <input type="password" name="password_confirm" placeholder="Confirm Password" required>
-        <button type="submit">Register</button>
-    </form>
-    <a href="{% url 'login' %}">Already have an account? Login</a>
-    
+        
+        <button type="button" onclick="showSection('section-communication')">Back</button>
+        <button type="submit">Create Account</button>
+    </div>
+</form>
 
-    <script>
-        document.getElementById('username').addEventListener('input', function() {
-            var username = this.value;
-            var feedback = document.getElementById('username-feedback');
-            
-            if (username.length > 0) {
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', '/check-username/?username=' + username, true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
+<a href="{% url 'login' %}">Already have an account? Login</a>
+
+<script>
+    // JavaScript for section navigation
+    function showSection(sectionId) {
+        document.querySelectorAll('.form-section').forEach(section => section.style.display = 'none');
+        document.getElementById(sectionId).style.display = 'block';
+    }
+
+    // Show/hide fields based on selected profession
+    document.getElementById('profession').addEventListener('change', function() {
+        var designation = document.getElementById('designation');
+        var company = document.getElementById('company');
+        if (this.value === 'Professional') {
+            designation.style.display = 'block';
+            company.style.display = 'block';
+        } else {
+            designation.style.display = 'none';
+            company.style.display = 'none';
+        }
+    });
+
+    // Debounced username availability check
+    let debounceTimeout;
+    document.getElementById('username').addEventListener('input', function() {
+        clearTimeout(debounceTimeout);
+        
+        let username = this.value;
+        let feedback = document.getElementById('username-feedback');
+        
+        if (username.length > 0) {
+            debounceTimeout = setTimeout(() => {
+                let xhr = new XMLHttpRequest();
+                xhr.open('GET', '{% url "check_username" %}?username=' + encodeURIComponent(username), true);
                 xhr.onload = function () {
-                    var data = JSON.parse(this.responseText);
-                    if (data.is_taken) {
-                        feedback.innerHTML = '<span style="color: red;">&#x2718; Username is already taken.</span>';
-                    } else {
-                        feedback.innerHTML = '<span style="color: green;">&#x2714; Username is available.</span>';
+                    if (xhr.status === 200) {
+                        let data = JSON.parse(xhr.responseText);
+                        if (data.is_taken) {
+                            feedback.innerHTML = '<span style="color: red;">&#x2718; Username is already taken.</span>';
+                        } else {
+                            feedback.innerHTML = '<span style="color: green;">&#x2714; Username is available.</span>';
+                        }
                     }
                 };
                 xhr.send();
-            } else {
-                feedback.innerHTML = '';
-            }
-        });
-    </script>
+            }, 300);  // Adjust debounce delay if necessary
+        } else {
+            feedback.innerHTML = '';
+        }
+    });
+</script>
 {% endblock %}
