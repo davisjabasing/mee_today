@@ -23,31 +23,200 @@ body {
 }
 
 /* Navigation bar styling */
-nav {
-    background-color: #4a90e2;
-    color: white;
-    padding: 10px;
+
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar */
+.navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
 }
 
-nav .logo a {
-    color: white;
-    text-decoration: none;
+.navbar .logo a {
     font-size: 1.5rem;
-    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
 }
 
-nav .menu a {
-    color: white;
+.navbar .menu {
+    display: flex;
+    align-items: center;
+}
+
+.navbar .nav-link {
+    color: #fff;
     text-decoration: none;
     margin: 0 10px;
 }
 
-nav .menu a:hover {
+.navbar .nav-link:hover {
+    color: #ddd;
+}
+
+/* Dropdown styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown .dropbtn {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown:hover .dropbtn {
+    color: #ddd;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #444;
+    min-width: 150px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #555;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar .menu {
+        flex-direction: column;
+    }
+    
+    .dropdown-content {
+        position: static;
+    }
+}
+
+
+/* Hero Section */
+.about-hero-section {
+    background-image: url('{% static "images/about-hero.jpg" %}');
+    background-size: cover;
+    background-position: center;
+    padding: 5rem 2rem;
+    color: rgb(19, 242, 7);
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+}
+
+/* General Styles */
+.about-content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.about-section {
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.content-wrapper {
+    max-width: 800px;
+    margin: auto;
+}
+
+.about-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.about-section p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+/* Team Section */
+.team-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.team-member {
+    text-align: center;
+    max-width: 200px;
+}
+
+.team-member img {
+    border-radius: 50%;
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+/* Contact Section */
+.contact-section a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.contact-section a:hover {
     text-decoration: underline;
 }
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .about-hero-section {
+        padding: 3rem 1rem;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .about-section h2 {
+        font-size: 1.75rem;
+    }
+
+    .team-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
 
 /* Welcome page styling */
 h2 {
@@ -60,30 +229,45 @@ p {
 }
 
 /* Search bar styling */
-.search-bar {
+.search-bar form {
     display: flex;
     gap: 10px;
-    margin-top: 20px;
+    flex-wrap: wrap;
 }
 
-.search-bar input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.search-bar input[type="text"] {
     flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    min-width: 150px; /* Minimum width for small screens */
 }
 
 .search-bar button {
-    padding: 8px 15px;
-    background-color: #4a90e2;
-    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
     border: none;
+    background-color: #007bff; /* Change to your preferred color */
+    color: white;
     border-radius: 4px;
     cursor: pointer;
 }
 
 .search-bar button:hover {
-    background-color: #357ab7;
+    background-color: #0056b3; /* Darker shade for hover effect */
+}
+
+@media (max-width: 600px) {
+    .search-bar form {
+        flex-direction: column;
+    }
+
+    .search-bar input[type="text"],
+    .search-bar button {
+        width: 100%;
+    }
 }
 
 /* User result styling */

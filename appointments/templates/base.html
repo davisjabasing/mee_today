@@ -1,4 +1,4 @@
-{% load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,38 +6,40 @@
     <link rel="icon" href="{% static 'images/favicon.ico' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeeToday</title>
-    <!-- Add this in your base.html or view_calendar.html head section -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.js'></script>
     <link rel="stylesheet" href="{% static 'style.css' %}">
-
-    
+    {% block css %}{% endblock %}
 </head>
 <body>
-    <nav>
+    <nav class="navbar">
         <div class="logo">
             <a href="{% url 'home' %}">MeeToday</a>
         </div>
         <div class="menu">
             {% if user.is_authenticated %}
-                <span>Hi {{ user.username }}</span>
-                <a href="{% url 'calendar' %}">View Calendar</a>
-                <a href="{% url 'notifications' %}">Notifications</a>
-                <a href="{% url 'edit_profile' %}">Edit Profile</a>  <!-- New Edit Profile Button -->
-                <a href="{% url 'logout' %}">Logout</a>
+                <a href="{% url 'calendar' %}" class="nav-link">View Calendar</a>
+                <a href="{% url 'about_us' %}" class="nav-link">About Us</a>
+                
+                <!-- Dropdown Menu for Authenticated User -->
+                <div class="dropdown">
+                    <button class="dropbtn">Hi, {{ user.username }}</button>
+                    <div class="dropdown-content">
+                        <a href="{% url 'edit_profile' %}">Edit Profile</a>
+                        <a href="{% url 'notifications' %}">Notifications</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    </div>
+                </div>
             {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'register' %}">Register</a>
+                <a href="{% url 'login' %}" class="nav-link">Login</a>
+                <a href="{% url 'register' %}" class="nav-link">Register</a>
             {% endif %}
         </div>
     </nav>
+    
     <div class="container">
         {% block content %}
         {% endblock %}
     </div>
-
-    <!-- <footer>
-        <p>© 2024 Mee Today. All rights reserved.</p>
-    </footer> -->
 </body>
 </html>

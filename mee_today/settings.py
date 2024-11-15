@@ -30,7 +30,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',  # Allow localhost
     'localhost',  # Allow localhost
     '449f-103-214-61-145.ngrok-free.app',
-    '172.168.100.104',
+    '172.168.100.105',
     '106.51.43.5',    # Add your ngrok URL here
 ]
 

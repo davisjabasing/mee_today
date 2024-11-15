@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
 
+{% block css %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'register.css' %}">
+    
+{% endblock %}
+
 {% block content %}
 <h2>Register</h2>
 
@@ -11,16 +17,34 @@
     {% csrf_token %}
     
     <!-- Section 1: Basic Details -->
-    <div id="section-basic" class="form-section">
+    <div id="section-basic" class="form-section active">
         <h3>Basic Information</h3>
         
-        <input type="text" id="username" name="username" placeholder="Username" required>
+        <label for="username">Try Username:</label>
+        <input type="text" id="username" name="username" placeholder="Username" required minlength="3" pattern="[a-z0-9_]+" title="Only lowercase letters, numbers, and underscores are allowed.">
         <span id="username-feedback"></span>
         
+        <label for="name">Name:</label>
         <input type="text" name="name" placeholder="Full Name" required>
-        <input type="email" name="email" placeholder="Email (optional)">
-        <input type="text" name="phone_number" placeholder="Phone Number" required>
+
+        <div class="toggle-container">
+            <label for="toggle-contact">Choose Contact Method:</label>
+            <div class="toggle-switch" onclick="toggleContact()">
+                <div class="slider"></div>
+            </div>
+        </div>
         
+        <div id="email-field">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email">
+        </div>
+        
+        <div id="phone-field" style="display: none;">
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" id="phone_number" name="phone_number" placeholder="Enter 10-digit phone number">
+            <span id="phone-feedback" class="error"></span>
+        </div>        
+                
         <label for="date_of_birth">Date of Birth</label>
         <input type="date" name="date_of_birth" required>
         
@@ -29,6 +53,7 @@
             <option value="">Select Sex</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
+            <option value="NoPrefer">Not to Prefer</option>
         </select>
         
         <button type="button" onclick="showSection('section-communication')">Next</button>
@@ -114,52 +139,111 @@
 <a href="{% url 'login' %}">Already have an account? Login</a>
 
 <script>
-    // JavaScript for section navigation
+    // JavaScript for navigating between sections
     function showSection(sectionId) {
         document.querySelectorAll('.form-section').forEach(section => section.style.display = 'none');
         document.getElementById(sectionId).style.display = 'block';
     }
+    
+    // Sequential validation for username with feedback
+    let debounceTimeout;
+    document.getElementById('username').addEventListener('input', function() {
+        clearTimeout(debounceTimeout);
+        
+        const username = this.value;
+        const feedback = document.getElementById('username-feedback');
+        
+        if (username.length < 3) {
+            feedback.innerHTML = '<span style="color: red;">Username must be at least 3 characters long.</span>';
+            return;
+        } 
+        
+        const usernamePattern = /^[a-z0-9_]+$/;  // Only lowercase, numbers, underscores allowed
+        if (!usernamePattern.test(username)) {
+            feedback.innerHTML = '<span style="color: red;">Only lowercase letters, numbers, and underscores are allowed.</span>';
+            return;
+        }
+        
+        // Debounced AJAX request to check username availability
+        debounceTimeout = setTimeout(() => {
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', '{% url "check_username" %}?username=' + encodeURIComponent(username), true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.is_taken) {
+                        feedback.innerHTML = '<span style="color: red;">&#x2718; Username is already taken.</span>';
+                    } else {
+                        feedback.innerHTML = '<span style="color: green;">&#x2714; Username is available.</span>';
+                    }
+                }
+            };
+            xhr.send();
+        }, 300);  // Adjust debounce delay if necessary
+    });
+    
+    // Email validation
+    document.getElementsByName('email')[0].addEventListener('input', function() {
+        const email = this.value;
+        const emailFeedback = document.getElementById('email-feedback') || document.createElement('span');
+        emailFeedback.id = 'email-feedback';
+        this.parentNode.insertBefore(emailFeedback, this.nextSibling);
+    
+        if (!email.endsWith('.com')) {
+            emailFeedback.innerHTML = '<span style="color: red;">Enter a valid Email ID</span>';
+        } else {
+            emailFeedback.innerHTML = '';
+        }
+    });
+    
+    // Country selection and phone number validation
+    // Phone number validation
+document.getElementById('phone_number').addEventListener('input', function() {
+    const phoneNumber = this.value;
+    const phoneFeedback = document.getElementById('phone-feedback');
 
-    // Show/hide fields based on selected profession
+    if (!/^\d{10}$/.test(phoneNumber)) {
+        phoneFeedback.textContent = "Phone number must contain exactly 10 digits.";
+    } else {
+        phoneFeedback.textContent = "";
+    }
+});
+    
+    // Profession-based form display adjustments
     document.getElementById('profession').addEventListener('change', function() {
-        var designation = document.getElementById('designation');
-        var company = document.getElementById('company');
+        const designation = document.getElementById('designation');
+        const company = document.getElementById('company');
+        
         if (this.value === 'Professional') {
             designation.style.display = 'block';
             company.style.display = 'block';
+        } else if (this.value === 'Student') {
+            designation.style.display = 'none';
+            company.style.display = 'none';
         } else {
             designation.style.display = 'none';
             company.style.display = 'none';
         }
     });
 
-    // Debounced username availability check
-    let debounceTimeout;
-    document.getElementById('username').addEventListener('input', function() {
-        clearTimeout(debounceTimeout);
-        
-        let username = this.value;
-        let feedback = document.getElementById('username-feedback');
-        
-        if (username.length > 0) {
-            debounceTimeout = setTimeout(() => {
-                let xhr = new XMLHttpRequest();
-                xhr.open('GET', '{% url "check_username" %}?username=' + encodeURIComponent(username), true);
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        let data = JSON.parse(xhr.responseText);
-                        if (data.is_taken) {
-                            feedback.innerHTML = '<span style="color: red;">&#x2718; Username is already taken.</span>';
-                        } else {
-                            feedback.innerHTML = '<span style="color: green;">&#x2714; Username is available.</span>';
-                        }
-                    }
-                };
-                xhr.send();
-            }, 300);  // Adjust debounce delay if necessary
-        } else {
-            feedback.innerHTML = '';
-        }
-    });
-</script>
+    // Toggle function to switch between email and phone fields
+function toggleContact() {
+    const toggleSwitch = document.querySelector('.toggle-switch');
+    const emailField = document.getElementById("email-field");
+    const phoneField = document.getElementById("phone-field");
+
+    toggleSwitch.classList.toggle('active');
+
+    if (toggleSwitch.classList.contains('active')) {
+        emailField.style.display = "none";
+        phoneField.style.display = "block";
+    } else {
+        emailField.style.display = "block";
+        phoneField.style.display = "none";
+    }
+}
+
+    
+    </script>
+    
 {% endblock %}

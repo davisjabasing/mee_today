@@ -1,0 +1,173 @@
+/* Global form container styling */
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 2em;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading styling */
+h2, h3 {
+    text-align: center;
+    color: #333;
+    font-family: Arial, sans-serif;
+}
+
+/* Label styling */
+label {
+    display: block;
+    margin: 15px 0 5px;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* Input and select field styling */
+input[type="text"],
+input[type="email"],
+input[type="date"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #f9f9f9;
+}
+
+/* Placeholder styling */
+input::placeholder,
+textarea::placeholder {
+    color: #888;
+    font-size: 0.9em;
+}
+
+/* Button styling */
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Section transitions */
+.form-section {
+    display: none;
+}
+
+.form-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Error messages */
+.error,
+span[id$="-feedback"] {
+    color: red;
+    font-size: 0.85em;
+    margin-top: 5px;
+    display: block;
+}
+
+.success-message {
+    color: green;
+    font-size: 0.85em;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Toggle container styling */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    font-weight: bold;
+    color: #555;
+}
+
+.toggle-container label {
+    margin-right: 15px;
+    font-size: 1em;
+}
+
+/* Toggle switch styling */
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background-color: #ccc;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.slider {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background-color: #fff;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-switch.active {
+    background-color: #007bff;
+}
+
+.toggle-switch.active .slider {
+    transform: translateX(24px);
+}
+
+/* Error message */
+.error {
+    color: red;
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    form {
+        padding: 1.5em;
+    }
+
+    h2, h3 {
+        font-size: 1.5em;
+    }
+
+    .toggle-container label {
+        font-size: 0.9em;
+    }
+
+    button {
+        font-size: 0.9em;
+        padding: 8px;
+    }
+}

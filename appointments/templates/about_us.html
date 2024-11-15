@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="about-hero-section">
+    <div class="hero-content">
+        <h1>About MeeToday</h1>
+        <p>Connecting professionals and simplifying your scheduling experience.</p>
+    </div>
+</div>
+
+<div class="about-content">
+    <!-- Mission Section -->
+    <section class="about-section mission-section">
+        <div class="content-wrapper">
+            <h2>Our Mission</h2>
+            <p>At MeeToday, our mission is to empower individuals and businesses with a seamless, intuitive platform for managing appointments. We’re dedicated to enhancing productivity, fostering connections, and delivering a streamlined scheduling experience for all.</p>
+        </div>
+    </section>
+
+    <!-- Our Team Section -->
+    <section class="about-section team-section">
+        <div class="content-wrapper">
+            <h2>Meet Our Team</h2>
+            <p>Our passionate team of developers, designers, and strategists work tirelessly to create a platform that prioritizes user experience and reliability. We value innovation and continuous improvement to serve our community better.</p>
+            <div class="team-grid">
+                <!-- Example Team Member -->
+                <div class="team-member">
+                    <img src="{% static 'images/default_image.webp' %}" alt="Team Member 1">
+                    <h3>Davis Jabasing D</h3>
+                    <p>CEO & Founder</p>
+                </div>
+                <div class="team-member">
+                    <img src="{% static 'images/default_image.webp' %}" alt="Team Member 2">
+                    <h3>Akhira</h3>
+                    <p>Lead Developer</p>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="about-section contact-section">
+        <div class="content-wrapper">
+            <h2>Contact Us</h2>
+            <p>If you have any questions, feedback, or partnership inquiries, don’t hesitate to reach out. We’re here to help and would love to connect with you!</p>
+            <p>Email: <a href="mailto:support@meetoday.com">support@meetoday.com</a></p>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -8,37 +8,55 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     # Link to the Django User model (one-to-one relationship)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
+
     # Basic Details
-    phone_number = models.CharField(max_length=15, unique=True)
+    phone_number = models.CharField(max_length=15, unique=True, blank=True, null=True)
+    email = models.EmailField(unique=True, blank=True, null=True)  # Optional email for flexibility
     date_of_birth = models.DateField(null=True, blank=True)
-    sex = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female')])
+    sex = models.CharField(
+        max_length=10, 
+        choices=[('Male', 'Male'), ('Female', 'Female'), ('NoPrefer', 'NoPrefer')],
+        default='Not Specified'
+    )
     age = models.IntegerField(null=True, blank=True)  # Calculated from date_of_birth
-    
+
     # Communication Details
-    address = models.TextField()
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    district = models.CharField(max_length=100)
-    pincode = models.CharField(max_length=10)
-    
+    address = models.TextField(blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    district = models.CharField(max_length=100, blank=True)
+    pincode = models.CharField(max_length=10, blank=True)
+
     # Professional Details
-    profession = models.CharField(max_length=20, choices=[('Student', 'Student'), ('Professional', 'Professional')])
-    designation = models.CharField(max_length=100, blank=True)  # Only for professionals
-    company = models.CharField(max_length=100, blank=True)      # Only for professionals
-    university = models.CharField(max_length=100, blank=True)   # Only for students
-    field_of_study = models.CharField(max_length=100, blank=True)  # Only for students
+    profession = models.CharField(
+        max_length=20, 
+        choices=[('Student', 'Student'), ('Professional', 'Professional')],
+        blank=True
+    )
+    designation = models.CharField(max_length=100, blank=True)  # For professionals
+    company = models.CharField(max_length=100, blank=True)      # For professionals
+    university = models.CharField(max_length=100, blank=True)   # For students
+    field_of_study = models.CharField(max_length=100, blank=True)  # For students
     description = models.TextField(blank=True)
-    
+
     # Optional Profile Photo
     photo = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
         # Calculate age based on date_of_birth, if provided
         if self.date_of_birth:
-            self.age = date.today().year - self.date_of_birth.year
+            today = date.today()
+            self.age = today.year - self.date_of_birth.year - (
+                (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+            )
         super(UserProfile, self).save(*args, **kwargs)
-    
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        # Ensure at least one of email or phone number is provided
+        if not self.phone_number and not self.email:
+            raise ValidationError("Either phone number or email must be provided.")
+
     def __str__(self):
         return f"{self.user.username}'s profile"
 

@@ -6,9 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Q
+
+
 
 
 def login_view(request):
@@ -25,6 +27,7 @@ def login_view(request):
 
 def register_view(request):
     if request.method == 'POST':
+        # Get all form inputs
         username = request.POST.get('username')
         name = request.POST.get('name')
         profession = request.POST.get('profession')
@@ -39,7 +42,8 @@ def register_view(request):
         field_of_study = request.POST.get('field_of_study', '')
         description = request.POST.get('description', '')
         phone_number = request.POST.get('phone_number')
-        date_of_birth_str = request.POST.get('date_of_birth')  # Receive date_of_birth as string
+        email = request.POST.get('email')
+        date_of_birth_str = request.POST.get('date_of_birth')
         sex = request.POST.get('sex')
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_confirm')
@@ -47,20 +51,27 @@ def register_view(request):
 
         # Convert date_of_birth string to a date object
         try:
-            date_of_birth = datetime.strptime(date_of_birth_str, '%Y-%m-%d').date()  # Adjust format if necessary
+            date_of_birth = datetime.strptime(date_of_birth_str, '%Y-%m-%d').date()
         except ValueError:
             return render(request, 'register.html', {'error': "Invalid Date of Birth format"})
 
+        # Check if passwords match
         if password != password_confirm:
             return render(request, 'register.html', {'error': "Passwords do not match"})
-        
+
+        # Ensure at least one of email or phone number is provided
+        if not email and not phone_number:
+            return render(request, 'register.html', {'error': "Please provide either an email or phone number."})
+
+        # Create User and UserProfile
         try:
             user = User.objects.create_user(username=username, password=password, first_name=name)
             user_profile = UserProfile.objects.create(
                 user=user,
                 profession=profession,
-                phone_number=phone_number,
-                date_of_birth=date_of_birth,  # Now date_of_birth is a date object
+                phone_number=phone_number if phone_number else None,
+                email=email if email else None,
+                date_of_birth=date_of_birth,
                 sex=sex,
                 address=address,
                 city=city,
@@ -78,7 +89,7 @@ def register_view(request):
             return redirect('home')
         except Exception as e:
             return render(request, 'register.html', {'error': str(e)})
-    
+
     return render(request, 'register.html')
 
 def home_view(request):
@@ -221,8 +232,9 @@ def profile_view(request, user_id):
         date = request.POST.get('date')
         duration = request.POST.get('duration')
 
-        start_time = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M')
-        end_time = start_time + datetime.timedelta(minutes=int(duration))
+        # Convert date string to datetime object
+        start_time = datetime.strptime(date, '%Y-%m-%dT%H:%M')
+        end_time = start_time + timedelta(minutes=int(duration))
 
         Appointment.objects.create(
             requester=request.user,
@@ -395,5 +407,6 @@ def edit_profile(request):
         'profile': profile
     })
 
-
+def about_us(request):
+    return render(request, 'about_us.html')
 

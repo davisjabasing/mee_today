@@ -93,33 +93,139 @@
     </script>
 
     <style>
-        .calendar-container {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-        }
-        .calendar {
-            flex: 2;
-        }
-        .status {
-            flex: 1;
-            padding: 20px;
-            border-left: 1px solid #ddd;
-        }
-        .status-content {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        @media (max-width: 768px) {
-            .calendar-container {
-                flex-direction: column;
-            }
-            .status {
-                border-left: none;
-                border-top: 1px solid #ddd;
-            }
-        }
+        /* General Layout */
+.calendar-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f4f4f9;
+    border-radius: 8px;
+    max-width: 1050px; /* Limits the max width of the calendar container */
+    margin: 0 auto;
+}
+
+.calendar {
+    flex: 2;
+    max-width: 700px; /* Smaller maximum width for the calendar */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: #fff;
+    padding: 10px;
+    font-size: 0.85rem; /* Reduces font size within the calendar */
+}
+
+.status {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem; /* Slightly smaller text */
+}
+
+.status h3 {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.status-content {
+    border: 1px solid #eee;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #fafafa;
+    color: #555;
+}
+
+.status-content p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #777;
+}
+
+/* FullCalendar Overrides */
+.fc-toolbar-title {
+    font-size: 1.3rem; /* Smaller title font size */
+    color: #333;
+    font-weight: bold;
+}
+
+.fc-button {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px; /* Smaller button padding */
+    font-size: 0.85rem; /* Reduced button font size */
+    transition: background-color 0.2s ease;
+}
+
+.fc-button:hover {
+    background-color: #357ab8;
+}
+
+.fc-button-primary:not(:disabled).fc-button-active,
+.fc-button-primary:not(:disabled):active {
+    background-color: #357ab8;
+    color: white;
+}
+
+.fc .fc-event {
+    background-color: #4a90e2;
+    border: none;
+    color: white;
+    font-size: 0.8rem; /* Smaller font size for events */
+    padding: 2px 4px; /* Tighter padding for events */
+    border-radius: 4px;
+    transition: transform 0.1s ease;
+}
+
+.fc .fc-event:hover {
+    background-color: #357ab8;
+    transform: scale(1.02);
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .calendar-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+    .calendar {
+        max-width: 100%; /* Full width for smaller screens */
+    }
+    .status {
+        border-top: 1px solid #ddd;
+        border-left: none;
+        margin-top: 20px;
+    }
+    .status h3 {
+        font-size: 1rem;
+    }
+    .calendar,
+    .status {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .status h3 {
+        font-size: 0.95rem;
+    }
+    .status-content {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+    .fc-toolbar-title {
+        font-size: 1rem;
+    }
+    .fc-button {
+        padding: 4px 6px;
+        font-size: 0.8rem;
+    }
+}
+
     </style>
 {% endblock %}
