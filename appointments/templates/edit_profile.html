@@ -12,20 +12,19 @@
 
     <!-- Show user profile details in readonly mode by default -->
     <div class="profile-details" id="profile-details">
-        <label for="profession">Profession:</label>
-        <input type="text" id="profession" name="profession" value="{{ profile.profession }}" readonly>
+        <label for="contact_info">Contact Info:</label>
+        <div id="contact-info-container">
+            {% if profile.phone_number %}
+                <input type="text" id="phone_number" name="phone_number" value="{{ profile.phone_number }}" readonly>
+                <button type="button" class="plus-btn" onclick="addEmailField()">+</button>
+            {% elif profile.user.email %}
+                <input type="email" id="email" name="email" value="{{ profile.user.email }}" readonly>
+                <button type="button" class="plus-btn" onclick="addPhoneField()">+</button>
+            {% endif %}
+        </div>
 
-        <label for="location">Location:</label>
-        <input type="text" id="location" name="location" value="{{ profile.location }}" readonly>
-
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" readonly>{{ profile.description }}</textarea>
-
-        <label for="phone_number">Phone Number:</label>
-        <input type="text" id="phone_number" name="phone_number" value="{{ profile.phone_number }}" readonly>
-
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" value="{{ profile.age }}" readonly>
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" value="{{ profile.date_of_birth }}" readonly>
 
         <label for="sex">Sex:</label>
         <input type="text" id="sex" name="sex" value="{{ profile.sex }}" readonly>
@@ -33,11 +32,9 @@
         <!-- Display current photo and allow for a new upload -->
         <label for="photo">Photo:</label>
         {% if profile.photo %}
-            <img id="photo-preview" src="{{ profile.photo.url }}" alt="Profile Photo" style="width: 38px; height: 38px;"> <!-- 1 cm = ~38 pixels -->
-            <p>Current Photo: {{ profile.photo.name }}</p>
+            <img id="photo-preview" src="{{ profile.photo.url }}" alt="Profile Photo" style="width: 38px; height: 38px;">
         {% else %}
             <img id="photo-preview" src="{% static 'images/default-profile.png' %}" alt="Default Profile Photo" style="width: 38px; height: 38px;">
-            <p>No photo added</p>
         {% endif %}
         <input type="file" id="photo" name="photo" style="display:none;" onchange="displayPhotoName()">  <!-- Hidden until editing -->
         <p id="photo-name"></p> <!-- Show file name when uploaded -->
@@ -50,34 +47,10 @@
     <button type="submit" id="save-changes-btn" style="display:none;">Save Changes</button>
 </form>
 
-<!-- Change password section always visible -->
-<h3>Change Password</h3>
-<form method="POST" action="{% url 'change_password' %}" id="change-password-form">
-    {% csrf_token %}
-    <input type="password" name="current_password" placeholder="Current Password" required>
-    <input type="password" name="new_password" placeholder="New Password" required>
-    <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
-    <button type="button" onclick="confirmPasswordChange()">Change Password</button>
-</form>
-
-<!-- Display messages for success or error -->
-{% if messages %}
-    <ul>
-        {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-
 <script>
     function enableEdit() {
         // Enable the form fields for editing
-        document.getElementById('profession').removeAttribute('readonly');
-        document.getElementById('location').removeAttribute('readonly');
-        document.getElementById('description').removeAttribute('readonly');
-        document.getElementById('phone_number').removeAttribute('readonly');
-        document.getElementById('age').removeAttribute('readonly');
-        document.getElementById('sex').removeAttribute('readonly');
+        document.querySelectorAll('#edit-profile-form input').forEach(input => input.removeAttribute('readonly'));
         document.getElementById('photo').style.display = 'block';  // Show file input for photo
 
         // Hide the edit button and show the save changes button
@@ -85,32 +58,34 @@
         document.getElementById('save-changes-btn').style.display = 'block';
     }
 
-    function displayPhotoName() {
-        var input = document.getElementById('photo');
-        var fileName = input.files[0].name;  // Get uploaded file name
-        document.getElementById('photo-name').textContent = fileName;  // Display file name
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('photo-preview').src = e.target.result;  // Update image preview
-        };
-        reader.readAsDataURL(input.files[0]);  // Read the uploaded file
-    }
-
-    function confirmPasswordChange() {
-        if (confirm("Do you want to change the password?")) {
-            // If the user clicks "Yes", submit the form with confirmation
-            const form = document.getElementById('change-password-form');
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'confirm_change';
-            hiddenInput.value = 'yes';
-            form.appendChild(hiddenInput);
-            form.submit();
-        } else {
-            // If the user clicks "No", return without submitting
-            return false;
+    function addEmailField() {
+        const container = document.getElementById('contact-info-container');
+        if (!document.getElementById('email')) {
+            const emailInput = document.createElement('input');
+            emailInput.type = 'email';
+            emailInput.id = 'email';
+            emailInput.name = 'email';
+            emailInput.placeholder = 'Enter Email';
+            container.appendChild(emailInput);
         }
     }
-</script>
 
+    function addPhoneField() {
+        const container = document.getElementById('contact-info-container');
+        if (!document.getElementById('phone_number')) {
+            const phoneInput = document.createElement('input');
+            phoneInput.type = 'text';
+            phoneInput.id = 'phone_number';
+            phoneInput.name = 'phone_number';
+            phoneInput.placeholder = 'Enter Phone Number';
+            container.appendChild(phoneInput);
+        }
+    }
+
+    function displayPhotoName() {
+        const input = document.getElementById('photo');
+        const fileName = input.files[0].name;
+        document.getElementById('photo-name').textContent = fileName;
+    }
+</script>
 {% endblock %}

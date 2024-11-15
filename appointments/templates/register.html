@@ -27,23 +27,26 @@
         <label for="name">Name:</label>
         <input type="text" name="name" placeholder="Full Name" required>
 
-        <div class="toggle-container">
-            <label for="toggle-contact">Choose Contact Method:</label>
-            <div class="toggle-switch" onclick="toggleContact()">
-                <div class="slider"></div>
-            </div>
+        <div class="contact-method-container">
+            <label for="contact-method">Choose Contact Method:</label>
+            <select id="contact-method" name="contact-method" onchange="showContactField()">
+                <option value="">-- Select --</option>
+                <option value="email">Email</option>
+                <option value="phone">Phone</option>
+            </select>
         </div>
         
-        <div id="email-field">
+        <div id="email-field" style="display: none;">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" placeholder="Enter your email">
+            <span id="email-feedback"></span>
         </div>
         
         <div id="phone-field" style="display: none;">
             <label for="phone_number">Phone Number:</label>
-            <input type="text" id="phone_number" name="phone_number" placeholder="Enter 10-digit phone number">
-            <span id="phone-feedback" class="error"></span>
-        </div>        
+            <input type="text" id="phone_number" name="phone_number" placeholder="Enter 10 digits">
+            <span id="phone-feedback"></span>
+        </div>                
                 
         <label for="date_of_birth">Date of Birth</label>
         <input type="date" name="date_of_birth" required>
@@ -113,27 +116,55 @@
     </div>
     
     <!-- Section 3: Professional Section -->
-    <div id="section-professional" class="form-section" style="display:none;">
-        <h3>Professional Details</h3>
+<div id="section-professional" class="form-section" style="display:none;">
+    <h3>Professional Details</h3>
+    
+    <label for="profession">Who are you?</label>
+    <select name="profession" id="profession" required onchange="toggleProfessionalFields()">
+        <option value="">Select Profession</option>
+        <option value="Student">Student</option>
+        <option value="Professional">Professional</option>
+    </select>
+    
+    <!-- Student-Specific Fields -->
+    <div id="student-fields" style="display:none;">
+        <label for="field_of_study">Field of Study:</label>
+        <input type="text" id="field_of_study" name="field_of_study" placeholder="Field of Study">
         
-        <label for="profession">Profession</label>
-        <select name="profession" id="profession" required>
-            <option value="">Select Profession</option>
-            <option value="Student">Student</option>
-            <option value="Professional">Professional</option>
-        </select>
-        
-        <input type="text" id="designation" name="designation" placeholder="Designation" style="display:none;">
-        <input type="text" id="company" name="company" placeholder="Company" style="display:none;">
-        
-        <textarea name="description" placeholder="Description (optional)"></textarea>
-        
-        <input type="password" name="password" placeholder="Password" required>
-        <input type="password" name="password_confirm" placeholder="Confirm Password" required>
-        
-        <button type="button" onclick="showSection('section-communication')">Back</button>
-        <button type="submit">Create Account</button>
+        <label for="university">University:</label>
+        <input type="text" id="university" name="university" placeholder="University">
     </div>
+    
+    <!-- Professional-Specific Fields -->
+    <div id="professional-fields" style="display:none;">
+        <label for="designation">Designation:</label>
+        <input type="text" id="designation" name="designation" placeholder="Designation">
+        
+        <label for="company">Company:</label>
+        <input type="text" id="company" name="company" placeholder="Company">
+    </div>
+    
+    <!-- Common Description Field -->
+    <label for="description">Tell Something About You:</label>
+    <textarea name="description" placeholder="Tell us about yourself!" required></textarea>
+    
+    <!-- Password Fields -->
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Password" required>
+    <div id="password-feedback" class="password-feedback">
+        <ul>
+            <li id="upper-check">A uppercase letter</li>
+            <li id="lower-check">A lowercase letter</li>
+            <li id="number-check">A number</li>
+            <li id="symbol-check">A symbol (e.g., @, #, $, %)</li>
+        </ul>
+        <div id="strength-bar"></div>
+    </div>
+
+    <input type="password" name="password_confirm" placeholder="Confirm Password" required>
+
+    <button type="button" onclick="showSection('section-communication')">Back</button>
+    <button type="submit">Create Account</button>
 </form>
 
 <a href="{% url 'login' %}">Already have an account? Login</a>
@@ -183,66 +214,127 @@
     });
     
     // Email validation
-    document.getElementsByName('email')[0].addEventListener('input', function() {
-        const email = this.value;
-        const emailFeedback = document.getElementById('email-feedback') || document.createElement('span');
-        emailFeedback.id = 'email-feedback';
-        this.parentNode.insertBefore(emailFeedback, this.nextSibling);
-    
-        if (!email.endsWith('.com')) {
-            emailFeedback.innerHTML = '<span style="color: red;">Enter a valid Email ID</span>';
-        } else {
-            emailFeedback.innerHTML = '';
-        }
+    document.getElementById('email').addEventListener('input', function () {
+    const email = this.value;
+    const emailFeedback = document.getElementById('email-feedback');
+
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+        emailFeedback.innerHTML = '<span style="color: red;">Please enter a valid email address.</span>';
+    } else if (!email.endsWith('.com')) {
+        emailFeedback.innerHTML = '<span style="color: red;">Email must end with .com</span>';
+    } else {
+        emailFeedback.innerHTML = '';
+    }
     });
     
-    // Country selection and phone number validation
     // Phone number validation
-document.getElementById('phone_number').addEventListener('input', function() {
+    document.getElementById('phone_number').addEventListener('input', function () {
     const phoneNumber = this.value;
     const phoneFeedback = document.getElementById('phone-feedback');
-
     if (!/^\d{10}$/.test(phoneNumber)) {
-        phoneFeedback.textContent = "Phone number must contain exactly 10 digits.";
+        phoneFeedback.innerHTML = '<span style="color: red;">Phone number must contain exactly 10 digits.</span>';
     } else {
-        phoneFeedback.textContent = "";
+        phoneFeedback.innerHTML = '';
     }
-});
-    
-    // Profession-based form display adjustments
-    document.getElementById('profession').addEventListener('change', function() {
-        const designation = document.getElementById('designation');
-        const company = document.getElementById('company');
-        
-        if (this.value === 'Professional') {
-            designation.style.display = 'block';
-            company.style.display = 'block';
-        } else if (this.value === 'Student') {
-            designation.style.display = 'none';
-            company.style.display = 'none';
-        } else {
-            designation.style.display = 'none';
-            company.style.display = 'none';
-        }
     });
+    
+    // Function to toggle fields based on the selected profession
+    function toggleProfessionalFields() {
+    const profession = document.getElementById('profession').value;
+    const studentFields = document.getElementById('student-fields');
+    const professionalFields = document.getElementById('professional-fields');
+    
+    if (profession === 'Student') {
+        studentFields.style.display = 'block';
+        professionalFields.style.display = 'none';
+    } else if (profession === 'Professional') {
+        studentFields.style.display = 'none';
+        professionalFields.style.display = 'block';
+    } else {
+        studentFields.style.display = 'none';
+        professionalFields.style.display = 'none';
+    }
+    }
 
     // Toggle function to switch between email and phone fields
-function toggleContact() {
-    const toggleSwitch = document.querySelector('.toggle-switch');
+    function showContactField() {
+    const contactMethod = document.getElementById("contact-method").value;
     const emailField = document.getElementById("email-field");
     const phoneField = document.getElementById("phone-field");
 
-    toggleSwitch.classList.toggle('active');
-
-    if (toggleSwitch.classList.contains('active')) {
+    if (contactMethod === "email") {
+        emailField.style.display = "block";
+        phoneField.style.display = "none";
+    } else if (contactMethod === "phone") {
         emailField.style.display = "none";
         phoneField.style.display = "block";
     } else {
-        emailField.style.display = "block";
+        emailField.style.display = "none";
         phoneField.style.display = "none";
     }
-}
+    }
 
+
+    // Password validation
+    const passwordInput = document.getElementById('password');
+    const upperCheck = document.getElementById('upper-check');
+    const lowerCheck = document.getElementById('lower-check');
+    const numberCheck = document.getElementById('number-check');
+    const symbolCheck = document.getElementById('symbol-check');
+    const strengthBar = document.getElementById('strength-bar');
+
+    passwordInput.addEventListener('input', function () {
+        const password = this.value;
+        let strength = 0;
+
+        // Check for upper case letter
+        if (/[A-Z]/.test(password)) {
+            upperCheck.style.color = 'green';
+            strength++;
+        } else {
+            upperCheck.style.color = 'red';
+        }
+
+        // Check for lower case letter
+        if (/[a-z]/.test(password)) {
+            lowerCheck.style.color = 'green';
+            strength++;
+        } else {
+            lowerCheck.style.color = 'red';
+        }
+
+        // Check for number
+        if (/\d/.test(password)) {
+            numberCheck.style.color = 'green';
+            strength++;
+        } else {
+            numberCheck.style.color = 'red';
+        }
+
+        // Check for symbol
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            symbolCheck.style.color = 'green';
+            strength++;
+        } else {
+            symbolCheck.style.color = 'red';
+        }
+
+        // Update password strength bar and feedback
+        if (password.length >= 6) {
+            strengthBar.style.width = (strength * 25) + '%';
+        } else {
+            strengthBar.style.width = '0%';
+        }
+
+        // Show strength bar color based on strength
+        if (strength === 4) {
+            strengthBar.style.backgroundColor = 'green';
+        } else if (strength === 3) {
+            strengthBar.style.backgroundColor = 'yellow';
+        } else {
+            strengthBar.style.backgroundColor = 'red';
+        }
+    });
     
     </script>
     

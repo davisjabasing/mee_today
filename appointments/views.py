@@ -371,10 +371,12 @@ def handle_appointment_status(request):
         else:
             return redirect('home')
 
+from datetime import datetime
+
 @login_required
 def edit_profile(request):
     profile = request.user.userprofile  # Fetch UserProfile instance for the logged-in user
-    
+
     if request.method == 'POST':
         # Update only fields that have changed
         if 'profession' in request.POST and request.POST['profession'] != profile.profession:
@@ -390,22 +392,35 @@ def edit_profile(request):
             profile.phone_number = request.POST['phone_number']
 
         if 'age' in request.POST and request.POST['age'] != str(profile.age):
-            profile.age = request.POST['age']
+            profile.age = int(request.POST['age'])
 
         if 'sex' in request.POST and request.POST['sex'] != profile.sex:
             profile.sex = request.POST['sex']
 
+        if 'date_of_birth' in request.POST:
+            try:
+                # Convert string to date object
+                date_of_birth = datetime.strptime(request.POST['date_of_birth'], '%Y-%m-%d').date()
+                if date_of_birth != profile.date_of_birth:
+                    profile.date_of_birth = date_of_birth
+            except ValueError:
+                messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+
         if 'photo' in request.FILES:
             profile.photo = request.FILES['photo']  # Update photo if a new one is uploaded
 
-        profile.save()  # Save the changes to the profile
-        messages.success(request, 'Profile updated successfully!')
-        return redirect('home')  # Redirect to home after saving changes
+        try:
+            profile.save()  # Save the changes to the profile
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('home')  # Redirect to home after saving changes
+        except Exception as e:
+            messages.error(request, f"Error saving profile: {e}")
 
     return render(request, 'edit_profile.html', {
         'user': request.user,
         'profile': profile
     })
+
 
 def about_us(request):
     return render(request, 'about_us.html')

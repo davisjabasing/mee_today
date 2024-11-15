@@ -18,7 +18,7 @@ class UserProfile(models.Model):
         choices=[('Male', 'Male'), ('Female', 'Female'), ('NoPrefer', 'NoPrefer')],
         default='Not Specified'
     )
-    age = models.IntegerField(null=True, blank=True)  # Calculated from date_of_birth
+    age = models.PositiveIntegerField(null=True, blank=True)  # Calculated from date_of_birth
 
     # Communication Details
     address = models.TextField(blank=True)
@@ -43,13 +43,21 @@ class UserProfile(models.Model):
     photo = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # Calculate age based on date_of_birth, if provided
         if self.date_of_birth:
             today = date.today()
             self.age = today.year - self.date_of_birth.year - (
                 (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
             )
-        super(UserProfile, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        
+    # def save(self, *args, **kwargs):
+    #     # Calculate age based on date_of_birth, if provided
+    #     if self.date_of_birth:
+    #         today = date.today()
+    #         self.age = today.year - self.date_of_birth.year - (
+    #             (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+    #         )
+    #     super(UserProfile, self).save(*args, **kwargs)
 
     def clean(self):
         from django.core.exceptions import ValidationError

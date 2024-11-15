@@ -100,55 +100,45 @@ span[id$="-feedback"] {
     display: block;
 }
 
-/* Toggle container styling */
-.toggle-container {
-    display: flex;
-    align-items: center;
+/* Dropdown container styling */
+.contact-method-container {
     margin: 15px 0;
+}
+
+label {
     font-weight: bold;
     color: #555;
 }
 
-.toggle-container label {
-    margin-right: 15px;
+/* Dropdown styling */
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
     font-size: 1em;
-}
-
-/* Toggle switch styling */
-.toggle-switch {
-    position: relative;
-    width: 50px;
-    height: 26px;
-    background-color: #ccc;
-    border-radius: 15px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-.slider {
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    background-color: #fff;
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.3s;
+/* Input field styling */
+input[type="text"],
+input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #f9f9f9;
+    margin-top: 10px;
 }
 
-.toggle-switch.active {
-    background-color: #007bff;
-}
-
-.toggle-switch.active .slider {
-    transform: translateX(24px);
-}
-
-/* Error message */
-.error {
+/* Feedback message styling */
+span[id$="-feedback"] {
     color: red;
     font-size: 0.85em;
     margin-top: 5px;
+    display: block;
 }
 
 
