@@ -1,91 +1,78 @@
-{% extends 'base.html' %}
 {% load static %}
-{% block content %}
-<h2>Edit Profile</h2>
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="{% static 'edit_profile.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Profile</h1>
+        <form id="edit-profile-form" method="post" action="{% url 'edit_profile' %}">
+            {% csrf_token %}
+            <!-- Display username -->
+            <div class="form-group">
+                <label>Name:</label>
+                <span>{{ user.username }}</span>
+            </div>
 
-<!-- Show the current username at the top, not editable -->
-<p><strong>Name:</strong> {{ user.username }}</p>
+            <!-- Dynamic fields from the context -->
+            {% for field in fields %}
+                <div class="form-group">
+                    <label for="{{ field }}">{{ field|title }}:</label>
+                    <input 
+                        type="text" 
+                        name="{{ field }}" 
+                        id="{{ field }}" 
+                        value="{{ user_profile|get_attribute:field }}" 
+                    {% if not editable %}readonly{% endif %}/>
+                </div>
+            {% endfor %}
 
-<!-- Form to edit profile -->
-<form method="POST" enctype="multipart/form-data" id="edit-profile-form">
-    {% csrf_token %}
 
-    <!-- Show user profile details in readonly mode by default -->
-    <div class="profile-details" id="profile-details">
-        <label for="contact_info">Contact Info:</label>
-        <div id="contact-info-container">
-            {% if profile.phone_number %}
-                <input type="text" id="phone_number" name="phone_number" value="{{ profile.phone_number }}" readonly>
-                <button type="button" class="plus-btn" onclick="addEmailField()">+</button>
-            {% elif profile.user.email %}
-                <input type="email" id="email" name="email" value="{{ profile.user.email }}" readonly>
-                <button type="button" class="plus-btn" onclick="addPhoneField()">+</button>
-            {% endif %}
-        </div>
 
-        <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" name="dob" value="{{ profile.date_of_birth }}" readonly>
+            <!-- Edit button -->
+            <button type="button" id="edit-btn">Edit</button>
 
-        <label for="sex">Sex:</label>
-        <input type="text" id="sex" name="sex" value="{{ profile.sex }}" readonly>
+            <!-- Save changes button -->
+            <button type="submit" id="save-btn" style="display: none;">Save Changes</button>
+        </form>
 
-        <!-- Display current photo and allow for a new upload -->
-        <label for="photo">Photo:</label>
-        {% if profile.photo %}
-            <img id="photo-preview" src="{{ profile.photo.url }}" alt="Profile Photo" style="width: 38px; height: 38px;">
-        {% else %}
-            <img id="photo-preview" src="{% static 'images/default-profile.png' %}" alt="Default Profile Photo" style="width: 38px; height: 38px;">
-        {% endif %}
-        <input type="file" id="photo" name="photo" style="display:none;" onchange="displayPhotoName()">  <!-- Hidden until editing -->
-        <p id="photo-name"></p> <!-- Show file name when uploaded -->
+        <!-- Change Password Section -->
+        <form id="change-password-form" method="post" action="{% url 'change_password' %}">
+            {% csrf_token %}
+            <h2>Change Password</h2>
+
+            <div class="form-group">
+                <label for="current_password">Current Password:</label>
+                <input type="password" name="current_password" id="current_password" required>
+            </div>
+            <div class="form-group">
+                <label for="new_password">New Password:</label>
+                <input type="password" name="new_password" id="new_password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" name="confirm_password" id="confirm_password" required>
+            </div>
+
+            <button type="submit">Change Password</button>
+        </form>
     </div>
 
-    <!-- Button to enable editing -->
-    <button type="button" id="edit-btn" onclick="enableEdit()">Edit</button>
+    <script>
+        const editButton = document.getElementById('edit-btn');
+        const saveButton = document.getElementById('save-btn');
+        const inputs = document.querySelectorAll('#edit-profile-form input');
 
-    <!-- Save Changes button will appear after editing is enabled -->
-    <button type="submit" id="save-changes-btn" style="display:none;">Save Changes</button>
-</form>
-
-<script>
-    function enableEdit() {
-        // Enable the form fields for editing
-        document.querySelectorAll('#edit-profile-form input').forEach(input => input.removeAttribute('readonly'));
-        document.getElementById('photo').style.display = 'block';  // Show file input for photo
-
-        // Hide the edit button and show the save changes button
-        document.getElementById('edit-btn').style.display = 'none';
-        document.getElementById('save-changes-btn').style.display = 'block';
-    }
-
-    function addEmailField() {
-        const container = document.getElementById('contact-info-container');
-        if (!document.getElementById('email')) {
-            const emailInput = document.createElement('input');
-            emailInput.type = 'email';
-            emailInput.id = 'email';
-            emailInput.name = 'email';
-            emailInput.placeholder = 'Enter Email';
-            container.appendChild(emailInput);
-        }
-    }
-
-    function addPhoneField() {
-        const container = document.getElementById('contact-info-container');
-        if (!document.getElementById('phone_number')) {
-            const phoneInput = document.createElement('input');
-            phoneInput.type = 'text';
-            phoneInput.id = 'phone_number';
-            phoneInput.name = 'phone_number';
-            phoneInput.placeholder = 'Enter Phone Number';
-            container.appendChild(phoneInput);
-        }
-    }
-
-    function displayPhotoName() {
-        const input = document.getElementById('photo');
-        const fileName = input.files[0].name;
-        document.getElementById('photo-name').textContent = fileName;
-    }
-</script>
-{% endblock %}
+        editButton.addEventListener('click', () => {
+            inputs.forEach(input => input.removeAttribute('readonly'));
+            editButton.style.display = 'none';
+            saveButton.style.display = 'inline-block';
+        });
+    </script>
+</body>
+</html>

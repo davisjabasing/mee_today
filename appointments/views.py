@@ -9,6 +9,7 @@ from django.contrib import messages
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Q
+from .forms import UserProfileForm
 
 
 
@@ -371,56 +372,50 @@ def handle_appointment_status(request):
         else:
             return redirect('home')
 
-from datetime import datetime
-
 @login_required
-def edit_profile(request):
-    profile = request.user.userprofile  # Fetch UserProfile instance for the logged-in user
+def edit_profile_view(request):
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    
+    fields = [
+        'name', 'profession', 'address', 'city', 'state', 'district',
+        'pincode', 'designation', 'company', 'university', 
+        'field_of_study', 'description', 'phone_number', 
+        'email', 'date_of_birth', 'sex'
+    ]
 
     if request.method == 'POST':
-        # Update only fields that have changed
-        if 'profession' in request.POST and request.POST['profession'] != profile.profession:
-            profile.profession = request.POST['profession']
+        user_profile.name = request.POST.get('name')
+        user_profile.profession = request.POST.get('profession')
+        user_profile.address = request.POST.get('address')
+        user_profile.city = request.POST.get('city')
+        user_profile.state = request.POST.get('state')
+        user_profile.district = request.POST.get('district')
+        user_profile.pincode = request.POST.get('pincode')
+        user_profile.designation = request.POST.get('designation', '')
+        user_profile.company = request.POST.get('company', '')
+        user_profile.university = request.POST.get('university', '')
+        user_profile.field_of_study = request.POST.get('field_of_study', '')
+        user_profile.description = request.POST.get('description', '')
+        user_profile.phone_number = request.POST.get('phone_number')
+        user_profile.email = request.POST.get('email')
+        user_profile.sex = request.POST.get('sex')
+        user_profile.photo = request.FILES.get('photo', user_profile.photo)
 
-        if 'location' in request.POST and request.POST['location'] != profile.location:
-            profile.location = request.POST['location']
-
-        if 'description' in request.POST and request.POST['description'] != profile.description:
-            profile.description = request.POST['description']
-
-        if 'phone_number' in request.POST and request.POST['phone_number'] != profile.phone_number:
-            profile.phone_number = request.POST['phone_number']
-
-        if 'age' in request.POST and request.POST['age'] != str(profile.age):
-            profile.age = int(request.POST['age'])
-
-        if 'sex' in request.POST and request.POST['sex'] != profile.sex:
-            profile.sex = request.POST['sex']
-
-        if 'date_of_birth' in request.POST:
-            try:
-                # Convert string to date object
-                date_of_birth = datetime.strptime(request.POST['date_of_birth'], '%Y-%m-%d').date()
-                if date_of_birth != profile.date_of_birth:
-                    profile.date_of_birth = date_of_birth
-            except ValueError:
-                messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
-
-        if 'photo' in request.FILES:
-            profile.photo = request.FILES['photo']  # Update photo if a new one is uploaded
-
+        # Convert date_of_birth string to a date object
+        date_of_birth_str = request.POST.get('date_of_birth')
         try:
-            profile.save()  # Save the changes to the profile
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('home')  # Redirect to home after saving changes
-        except Exception as e:
-            messages.error(request, f"Error saving profile: {e}")
+            user_profile.date_of_birth = datetime.strptime(date_of_birth_str, '%Y-%m-%d').date()
+        except ValueError:
+            return render(request, 'edit_profile.html', {
+                'error': "Invalid Date of Birth format", 
+                'user_profile': user_profile, 
+                'fields': fields
+            })
 
-    return render(request, 'edit_profile.html', {
-        'user': request.user,
-        'profile': profile
-    })
+        user_profile.save()
+        return redirect('home')
 
+    return render(request, 'edit_profile.html', {'user_profile': user_profile, 'fields': fields})
 
 def about_us(request):
     return render(request, 'about_us.html')

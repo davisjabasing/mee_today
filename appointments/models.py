@@ -10,6 +10,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     # Basic Details
+    name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=15, unique=True, blank=True, null=True)
     email = models.EmailField(unique=True, blank=True, null=True)  # Optional email for flexibility
     date_of_birth = models.DateField(null=True, blank=True)
@@ -49,7 +50,7 @@ class UserProfile(models.Model):
                 (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
             )
         super().save(*args, **kwargs)
-        
+
     # def save(self, *args, **kwargs):
     #     # Calculate age based on date_of_birth, if provided
     #     if self.date_of_birth:
