@@ -9,8 +9,6 @@ def other_user(appointment, user):
     return appointment.requester.username
 
 
-
-
 @register.filter(name='get_attribute')
 def get_attribute(obj, attr, default=None):
     return getattr(obj, attr, default)
