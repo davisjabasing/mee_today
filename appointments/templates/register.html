@@ -3,7 +3,6 @@
 {% block css %}
 {% load static %}
     <link rel="stylesheet" href="{% static 'register.css' %}">
-    
 {% endblock %}
 
 {% block content %}
@@ -60,6 +59,8 @@
         </select>
         
         <button type="button" onclick="showSection('section-communication')">Next</button>
+
+        <a href="{% url 'login' %}">Already have an account? Login</a>
     </div>
     
     <!-- Section 2: Communication Details -->
@@ -113,6 +114,8 @@
         
         <button type="button" onclick="showSection('section-basic')">Back</button>
         <button type="button" onclick="showSection('section-professional')">Next</button>
+
+        <a href="{% url 'login' %}">Already have an account? Login</a>
     </div>
     
     <!-- Section 3: Professional Section -->
@@ -152,16 +155,13 @@
     <label for="password">Password</label>
     <input type="password" id="password" name="password" placeholder="Password" required>
     <div id="password-feedback" class="password-feedback">
-        <ul>
-            <li id="upper-check">A uppercase letter</li>
-            <li id="lower-check">A lowercase letter</li>
-            <li id="number-check">A number</li>
-            <li id="symbol-check">A symbol (e.g., @, #, $, %)</li>
-        </ul>
-        <div id="strength-bar"></div>
+        <div id="strength-bar" class="strength-bar"></div>
+        <p id="strength-text"></p>
     </div>
 
-    <input type="password" name="password_confirm" placeholder="Confirm Password" required>
+    <label for="password_confirm">Confirm Password</label>
+<input type="password" id="password_confirm" name="password_confirm" placeholder="Confirm Password" required>
+<p id="match-feedback" class="feedback"></p>
 
     <button type="button" onclick="showSection('section-communication')">Back</button>
     <button type="submit">Create Account</button>
@@ -274,67 +274,43 @@
     }
     }
 
+    const passwordInput = document.getElementById("password");
+const confirmPasswordInput = document.getElementById("password_confirm");
+const strengthBar = document.getElementById("strength-bar");
+const strengthText = document.getElementById("strength-text");
+const matchFeedback = document.getElementById("match-feedback");
 
-    // Password validation
-    const passwordInput = document.getElementById('password');
-    const upperCheck = document.getElementById('upper-check');
-    const lowerCheck = document.getElementById('lower-check');
-    const numberCheck = document.getElementById('number-check');
-    const symbolCheck = document.getElementById('symbol-check');
-    const strengthBar = document.getElementById('strength-bar');
+passwordInput.addEventListener("input", updatePasswordStrength);
+confirmPasswordInput.addEventListener("input", checkPasswordMatch);
 
-    passwordInput.addEventListener('input', function () {
-        const password = this.value;
-        let strength = 0;
+function updatePasswordStrength() {
+    const password = passwordInput.value;
+    const length = password.length;
 
-        // Check for upper case letter
-        if (/[A-Z]/.test(password)) {
-            upperCheck.style.color = 'green';
-            strength++;
-        } else {
-            upperCheck.style.color = 'red';
-        }
+    if (length < 6) {
+        strengthBar.className = "strength-bar weak";
+        strengthText.textContent = "Weak";
+    } else if (length >= 6 && length < 10) {
+        strengthBar.className = "strength-bar medium";
+        strengthText.textContent = "Medium";
+    } else if (length >= 10) {
+        strengthBar.className = "strength-bar strong";
+        strengthText.textContent = "Strong";
+    }
+}
 
-        // Check for lower case letter
-        if (/[a-z]/.test(password)) {
-            lowerCheck.style.color = 'green';
-            strength++;
-        } else {
-            lowerCheck.style.color = 'red';
-        }
+function checkPasswordMatch() {
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
 
-        // Check for number
-        if (/\d/.test(password)) {
-            numberCheck.style.color = 'green';
-            strength++;
-        } else {
-            numberCheck.style.color = 'red';
-        }
-
-        // Check for symbol
-        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            symbolCheck.style.color = 'green';
-            strength++;
-        } else {
-            symbolCheck.style.color = 'red';
-        }
-
-        // Update password strength bar and feedback
-        if (password.length >= 6) {
-            strengthBar.style.width = (strength * 25) + '%';
-        } else {
-            strengthBar.style.width = '0%';
-        }
-
-        // Show strength bar color based on strength
-        if (strength === 4) {
-            strengthBar.style.backgroundColor = 'green';
-        } else if (strength === 3) {
-            strengthBar.style.backgroundColor = 'yellow';
-        } else {
-            strengthBar.style.backgroundColor = 'red';
-        }
-    });
+    if (password === confirmPassword) {
+        matchFeedback.textContent = "Passwords match";
+        matchFeedback.className = "feedback valid";
+    } else {
+        matchFeedback.textContent = "Passwords do not match";
+        matchFeedback.className = "feedback";
+    }
+}
     
     </script>
     

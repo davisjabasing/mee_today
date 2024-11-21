@@ -10,6 +10,11 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Q
 from .forms import UserProfileForm
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.conf import settings
 
 
 
@@ -109,7 +114,11 @@ def home_view(request):
         if profession:
             users = users.filter(profession__icontains=profession)
         if location:
-            users = users.filter(location__icontains=location)
+            users = users.filter(
+                Q(city__icontains=location) | 
+                Q(state__icontains=location) | 
+                Q(address__icontains=location)
+            )
 
         # Get suggested users if no results are found
         if not users.exists():
@@ -133,7 +142,10 @@ def home_view(request):
             if profession:
                 users = users.filter(profession__icontains=profession)
             if location:
-                users = users.filter(location__icontains=location)
+                users = users.filter(
+                    Q(city__icontains=location) | 
+                    Q(state__icontains=location)
+                )
 
             if not users.exists():
                 suggested_users = UserProfile.objects.exclude(user=request.user).order_by('?')[:2]

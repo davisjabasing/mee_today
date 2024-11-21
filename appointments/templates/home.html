@@ -12,7 +12,7 @@
                 <!-- Retain the search input values -->
                 <input type="text" name="name" value="{{ name }}" placeholder="Search by Name" style="flex: 1;">
                 <input type="text" name="profession" value="{{ profession }}" placeholder="Search by Profession" style="flex: 1;">
-                <input type="text" name="location" value="{{ location }}" placeholder="Search by Location" style="flex: 1;">
+                <input type="text" name="location" value="{{ location }}" placeholder="Search by City or State" style="flex: 1;">
                 <button type="submit">Search</button>
             </form>
         {% else %}
@@ -23,16 +23,21 @@
     {% if users %}
         <div class="user-results">
             {% for user in users %}
-                <div class="user-box">
-                    <a href="{% url 'profile' user.user.id %}">
-                        {% if user.photo %}
-                            <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo" style="width: 38px; height: 38px;">
-                        {% else %}
-                            <img src="{% static 'images/default_image.webp' %}" alt="Default photo" style="width: 38px; height: 38px;">
-                        {% endif %}
-                        <p>{{ user.user.username }}</p>
-                        <p>{{ user.profession }}</p>
-                        <p>{{ user.location }}</p>
+                <div class="user-box" style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; display: flex; align-items: center;">
+                    <a href="{% url 'profile' user.user.id %}" style="text-decoration: none; color: inherit;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if user.photo %}
+                                <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo" style="width: 50px; height: 50px; border-radius: 50%;">
+                            {% else %}
+                                <img src="{% static 'images/default_image.webp' %}" alt="Default photo" style="width: 50px; height: 50px; border-radius: 50%;">
+                            {% endif %}
+                            <div>
+                                <p style="font-weight: bold; margin: 0;">{{ user.user.username }}</p>
+                                <p style="margin: 0;">{{ user.profession }}</p>
+                                <p style="margin: 0;">{{ user.city }}, {{ user.state }}</p>
+                                <p style="margin: 0; font-size: 0.9em; color: #666;">{{ user.address }}</p>
+                            </div>
+                        </div>
                     </a>
                 </div>
             {% endfor %}
@@ -46,20 +51,24 @@
         <h3>Suggested Users:</h3>
         <div class="user-results">
             {% for user in suggested_users %}
-                <div class="user-box">
-                    <a href="{% url 'profile' user.user.id %}">
-                        {% if user.photo %}
-                            <img src="{% static 'images/default_image.webp' %}" alt="{{ user.user.username }}'s photo" style="width: 38px; height: 38px;">
-                        {% else %}
-                            <img src="{% static 'images/default_image.webp' %}" alt="Default photo" style="width: 38px; height: 38px;">
-                        {% endif %}
-                        <p>{{ user.user.username }}</p>
-                        <p>{{ user.profession }}</p>
-                        <p>{{ user.location }}</p>
+                <div class="user-box" style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; display: flex; align-items: center;">
+                    <a href="{% url 'profile' user.user.id %}" style="text-decoration: none; color: inherit;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if user.photo %}
+                                <img src="{{ user.photo.url }}" alt="{{ user.user.username }}'s photo" style="width: 50px; height: 50px; border-radius: 50%;">
+                            {% else %}
+                                <img src="{% static 'images/default_image.webp' %}" alt="Default photo" style="width: 50px; height: 50px; border-radius: 50%;">
+                            {% endif %}
+                            <div>
+                                <p style="font-weight: bold; margin: 0;">{{ user.user.username }}</p>
+                                <p style="margin: 0;">{{ user.profession }}</p>
+                                <p style="margin: 0;">{{ user.city }}, {{ user.state }}</p>
+                                <p style="margin: 0; font-size: 0.9em; color: #666;">{{ user.address }}</p>
+                            </div>
+                        </div>
                     </a>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
-
 {% endblock %}

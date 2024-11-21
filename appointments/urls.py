@@ -21,6 +21,7 @@ urlpatterns = [
 
 
     path('forgot-password/', views.forgot_password_view, name='forgot_password_view'),
+    
 
 
     ############Edit page password change
