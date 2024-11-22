@@ -18,10 +18,13 @@ urlpatterns = [
 
 
     path('check-username/', views.check_username, name='check_username'),
+    path('check-email/', views.check_email, name='check_email'),
 
 
-    path('forgot-password/', views.forgot_password_view, name='forgot_password_view'),
+    #path('forgot-password/', views.forgot_password_view, name='forgot_password_view'),
     
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('reset-password/<uidb64>/<token>/', views.reset_password, name='reset_password'),
 
 
     ############Edit page password change

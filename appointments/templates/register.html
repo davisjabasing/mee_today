@@ -26,26 +26,17 @@
         <label for="name">Name:</label>
         <input type="text" name="name" placeholder="Full Name" required>
 
-        <div class="contact-method-container">
-            <label for="contact-method">Choose Contact Method:</label>
-            <select id="contact-method" name="contact-method" onchange="showContactField()">
-                <option value="">-- Select --</option>
-                <option value="email">Email</option>
-                <option value="phone">Phone</option>
-            </select>
-        </div>
-        
-        <div id="email-field" style="display: none;">
+        <div class="form-group">
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email">
-            <span id="email-feedback"></span>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            <small id="email-feedback" class="error-message" style="display: block; margin-top: 5px;"></small>
         </div>
         
-        <div id="phone-field" style="display: none;">
-            <label for="phone_number">Phone Number:</label>
+        <div class="form-group">
+            <label for="phone_number">Phone Number (Optional):</label>
             <input type="text" id="phone_number" name="phone_number" placeholder="Enter 10 digits">
             <span id="phone-feedback"></span>
-        </div>                
+        </div>        
                 
         <label for="date_of_birth">Date of Birth</label>
         <input type="date" name="date_of_birth" required>
@@ -170,10 +161,38 @@
 <a href="{% url 'login' %}">Already have an account? Login</a>
 
 <script>
+    
+    function validateSection(sectionId) {
+        // Find the current section
+        const section = document.getElementById(sectionId);
+        const inputs = section.querySelectorAll("input, select, textarea"); // All input fields in the section
+        let valid = true;
+
+        // Validate all required fields
+        inputs.forEach(input => {
+            if (input.hasAttribute("required") && !input.value.trim()) {
+                input.classList.add("error"); // Highlight empty fields
+                valid = false;
+            } else {
+                input.classList.remove("error"); // Remove error highlight if valid
+            }
+        });
+
+        return valid;
+    }
+    
     // JavaScript for navigating between sections
     function showSection(sectionId) {
-        document.querySelectorAll('.form-section').forEach(section => section.style.display = 'none');
-        document.getElementById(sectionId).style.display = 'block';
+        const currentSectionId = document.querySelector(".form-section:not([style*='display: none'])").id;
+
+        if (sectionId !== "section-basic" && !validateSection(currentSectionId)) {
+            alert("Please fill in all required fields before proceeding.");
+            return; // Stop navigation if validation fails
+        }
+
+        // Hide all sections and show the selected one
+        document.querySelectorAll(".form-section").forEach(section => section.style.display = "none");
+        document.getElementById(sectionId).style.display = "block";
     }
     
     // Sequential validation for username with feedback
@@ -256,23 +275,7 @@
     }
     }
 
-    // Toggle function to switch between email and phone fields
-    function showContactField() {
-    const contactMethod = document.getElementById("contact-method").value;
-    const emailField = document.getElementById("email-field");
-    const phoneField = document.getElementById("phone-field");
-
-    if (contactMethod === "email") {
-        emailField.style.display = "block";
-        phoneField.style.display = "none";
-    } else if (contactMethod === "phone") {
-        emailField.style.display = "none";
-        phoneField.style.display = "block";
-    } else {
-        emailField.style.display = "none";
-        phoneField.style.display = "none";
-    }
-    }
+    
 
     const passwordInput = document.getElementById("password");
 const confirmPasswordInput = document.getElementById("password_confirm");
@@ -311,7 +314,7 @@ function checkPasswordMatch() {
         matchFeedback.className = "feedback";
     }
 }
-    
+
     </script>
     
 {% endblock %}

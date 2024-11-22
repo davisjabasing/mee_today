@@ -142,3 +142,43 @@ LOGOUT_REDIRECT_URL = 'login'  # After logout, redirect users to the login page
 # ]
 
 
+# # Email Backend Configuration
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# # SMTP Server Settings
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True  # Use TLS (Transport Layer Security)
+# EMAIL_USE_SSL = False  # Do not use SSL since TLS is enabled
+
+# # Email Credentials
+# EMAIL_HOST_USER = 'me.kuttichathan@gmail.com'  # Your Gmail address
+# EMAIL_HOST_PASSWORD = 'yhiszhroijhoglqa'  # Your Gmail App Password (NOT your Gmail password)
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'me.kuttichathan@gmail.com'
+EMAIL_HOST_PASSWORD = 'yhiszhroijhoglqa'  # Consider using environment variables for security.
+DEFAULT_FROM_EMAIL = 'me.kuttichathan@gmail.com'
+
+
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#         },
+#     },
+# }

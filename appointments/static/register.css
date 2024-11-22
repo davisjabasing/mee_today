@@ -209,3 +209,9 @@ span[id$="-feedback"] {
 .feedback.valid {
     color: green;
 }
+
+
+.error-message {
+    font-size: 0.9em;
+    margin-top: 5px;
+}

@@ -12,14 +12,14 @@ class UserProfile(models.Model):
     # Basic Details
     name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=15, unique=True, blank=True, null=True)
-    email = models.EmailField(unique=True, blank=True, null=True)  # Optional email for flexibility
+    email = models.EmailField(unique=True, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     sex = models.CharField(
-        max_length=10, 
+        max_length=10,
         choices=[('Male', 'Male'), ('Female', 'Female'), ('NoPrefer', 'NoPrefer')],
         default='Not Specified'
     )
-    age = models.PositiveIntegerField(null=True, blank=True)  # Calculated from date_of_birth
+    age = models.PositiveIntegerField(null=True, blank=True)
 
     # Communication Details
     address = models.TextField(blank=True)
@@ -30,14 +30,14 @@ class UserProfile(models.Model):
 
     # Professional Details
     profession = models.CharField(
-        max_length=20, 
+        max_length=20,
         choices=[('Student', 'Student'), ('Professional', 'Professional')],
         blank=True
     )
-    designation = models.CharField(max_length=100, blank=True)  # For professionals
-    company = models.CharField(max_length=100, blank=True)      # For professionals
-    university = models.CharField(max_length=100, blank=True)   # For students
-    field_of_study = models.CharField(max_length=100, blank=True)  # For students
+    designation = models.CharField(max_length=100, blank=True)
+    company = models.CharField(max_length=100, blank=True)
+    university = models.CharField(max_length=100, blank=True)
+    field_of_study = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
 
     # Optional Profile Photo
@@ -50,15 +50,6 @@ class UserProfile(models.Model):
                 (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
             )
         super().save(*args, **kwargs)
-
-    # def save(self, *args, **kwargs):
-    #     # Calculate age based on date_of_birth, if provided
-    #     if self.date_of_birth:
-    #         today = date.today()
-    #         self.age = today.year - self.date_of_birth.year - (
-    #             (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
-    #         )
-    #     super(UserProfile, self).save(*args, **kwargs)
 
     def clean(self):
         from django.core.exceptions import ValidationError

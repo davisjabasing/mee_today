@@ -9,7 +9,7 @@ from django.contrib import messages
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Q
-from .forms import UserProfileForm
+from django.db import transaction
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -36,18 +36,18 @@ def register_view(request):
         # Get all form inputs
         username = request.POST.get('username')
         name = request.POST.get('name')
-        profession = request.POST.get('profession')
-        address = request.POST.get('address')
-        city = request.POST.get('city')
-        state = request.POST.get('state')
-        district = request.POST.get('district')
-        pincode = request.POST.get('pincode')
+        profession = request.POST.get('profession', '')
+        address = request.POST.get('address', '')
+        city = request.POST.get('city', '')
+        state = request.POST.get('state', '')
+        district = request.POST.get('district', '')
+        pincode = request.POST.get('pincode', '')
         designation = request.POST.get('designation', '')
         company = request.POST.get('company', '')
         university = request.POST.get('university', '')
         field_of_study = request.POST.get('field_of_study', '')
         description = request.POST.get('description', '')
-        phone_number = request.POST.get('phone_number')
+        phone_number = request.POST.get('phone_number', '')
         email = request.POST.get('email')
         date_of_birth_str = request.POST.get('date_of_birth')
         sex = request.POST.get('sex')
@@ -59,44 +59,70 @@ def register_view(request):
         try:
             date_of_birth = datetime.strptime(date_of_birth_str, '%Y-%m-%d').date()
         except ValueError:
-            return render(request, 'register.html', {'error': "Invalid Date of Birth format"})
+            return render(request, 'register.html', {'error': "Invalid Date of Birth format."})
 
         # Check if passwords match
         if password != password_confirm:
-            return render(request, 'register.html', {'error': "Passwords do not match"})
+            return render(request, 'register.html', {'error': "Passwords do not match."})
 
-        # Ensure at least one of email or phone number is provided
-        if not email and not phone_number:
-            return render(request, 'register.html', {'error': "Please provide either an email or phone number."})
+        # Ensure email is provided
+        if not email:
+            return render(request, 'register.html', {'error': "Email is mandatory."})
 
-        # Create User and UserProfile
         try:
-            user = User.objects.create_user(username=username, password=password, first_name=name)
-            user_profile = UserProfile.objects.create(
-                user=user,
-                profession=profession,
-                phone_number=phone_number if phone_number else None,
-                email=email if email else None,
-                date_of_birth=date_of_birth,
-                sex=sex,
-                address=address,
-                city=city,
-                state=state,
-                district=district,
-                pincode=pincode,
-                designation=designation,
-                company=company,
-                university=university,
-                field_of_study=field_of_study,
-                description=description,
-                photo=photo
-            )
-            login(request, user)
-            return redirect('home')
+            with transaction.atomic():
+                # Create the User object
+                user = User.objects.create_user(username=username, password=password, first_name=name)
+
+                # Create the UserProfile object
+                UserProfile.objects.create(
+                    user=user,
+                    name=name,
+                    profession=profession,
+                    phone_number=phone_number if phone_number else None,
+                    email=email,
+                    date_of_birth=date_of_birth,
+                    sex=sex,
+                    address=address,
+                    city=city,
+                    state=state,
+                    district=district,
+                    pincode=pincode,
+                    designation=designation,
+                    company=company,
+                    university=university,
+                    field_of_study=field_of_study,
+                    description=description,
+                    photo=photo
+                )
+
+                # Send a welcome email
+                try:
+                    send_mail(
+                        subject="Welcome to Mee Today!",
+                        message=f"Hi {name},\n\nThank you for choosing Mee Today! We’re excited to provide you with an exceptional experience.",
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                    )
+                except Exception as e:
+                    return render(request, 'register.html', {'error': f"Error sending email: {str(e)}"})
+
+                # Automatically log in the user and redirect to the home page
+                login(request, user)
+                return redirect('home')
+
         except Exception as e:
+            # Catch errors and ensure no partial data is saved
             return render(request, 'register.html', {'error': str(e)})
 
     return render(request, 'register.html')
+
+def check_email(request):
+    email = request.GET.get('email', None)
+    if email:
+        is_taken = User.objects.filter(email__iexact=email).exists()
+        return JsonResponse({'is_taken': is_taken})
+    return JsonResponse({'is_taken': False})  # Default response if no email is provided
 
 def home_view(request):
     name = profession = location = None
@@ -171,34 +197,70 @@ def check_username(request):
     }
     return JsonResponse(data)
 
-def forgot_password_view(request):
+def forgot_password(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        phone_number = request.POST.get('phone_number')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
+        email = request.POST.get('email')
 
-        # Check if passwords match
-        if new_password != confirm_password:
-            return render(request, 'forgot_password.html', {'error': 'Passwords do not match'})
-        
-        try:
-            # Get the user and check phone number
-            user = User.objects.get(username=username)
-            user_profile = UserProfile.objects.get(user=user)
+        # Step 1: Validate email and send reset link
+        if email:
+            try:
+                user = User.objects.get(email=email)
+                token = default_token_generator.make_token(user)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                reset_link = f"{settings.DOMAIN}/reset-password/{uid}/{token}/"
 
-            if user_profile.phone_number == phone_number:
-                # Update the user's password if the phone number matches
-                user.password = make_password(new_password)
-                user.save()
-                return redirect('login')  # Redirect to login after successful password reset
+                # Send email
+                send_mail(
+                    subject="Password Reset Request",
+                    message=f"Click the link to reset your password: {reset_link}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                )
+                messages.success(request, "Password reset link sent to your email.")
+            except User.DoesNotExist:
+                messages.error(request, "No account found with this email.")
+            return redirect('forgot_password')
+
+        # Step 2: Handle password reset form submission
+        reset_token = request.POST.get('reset_token')
+        if reset_token:
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+
+            if new_password == confirm_password:
+                uidb64 = request.POST.get('uidb64')
+                token = request.POST.get('token')
+                try:
+                    uid = force_str(urlsafe_base64_decode(uidb64))
+                    user = User.objects.get(pk=uid)
+
+                    if default_token_generator.check_token(user, token):
+                        user.set_password(new_password)
+                        user.save()
+                        messages.success(request, "Your password has been reset successfully.")
+                        return redirect('login')
+                    else:
+                        messages.error(request, "Invalid or expired token.")
+                except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+                    messages.error(request, "Invalid reset link.")
             else:
-                return render(request, 'forgot_password.html', {'error': 'Username or phone number incorrect'})
+                messages.error(request, "Passwords do not match.")
+            return redirect('forgot_password')
 
-        except User.DoesNotExist:
-            return render(request, 'forgot_password.html', {'error': 'Username or phone number incorrect'})
-    
     return render(request, 'forgot_password.html')
+
+def reset_password(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        return render(request, 'forgot_password.html', {'reset_token': token, 'uidb64': uidb64})
+    else:
+        messages.error(request, "Invalid or expired token.")
+        return redirect('forgot_password')
 
 def change_password(request):
     if request.method == 'POST':
