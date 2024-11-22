@@ -215,3 +215,22 @@ span[id$="-feedback"] {
     font-size: 0.9em;
     margin-top: 5px;
 }
+
+
+.toggle-password {
+    font-size: 18px;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.toggle-password:hover {
+    color: #333;
+}
+
+.strength-bar {
+    height: 5px;
+    background: #ccc;
+    margin-top: 5px;
+    border-radius: 3px;
+}

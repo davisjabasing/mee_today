@@ -118,11 +118,10 @@ def register_view(request):
     return render(request, 'register.html')
 
 def check_email(request):
-    email = request.GET.get('email', None)
-    if email:
-        is_taken = User.objects.filter(email__iexact=email).exists()
-        return JsonResponse({'is_taken': is_taken})
-    return JsonResponse({'is_taken': False})  # Default response if no email is provided
+    email = request.GET.get('email', '').strip()
+    is_taken = UserProfile.objects.filter(email=email).exists()
+
+    return JsonResponse({'is_taken': is_taken})
 
 def home_view(request):
     name = profession = location = None

@@ -144,15 +144,22 @@
     
     <!-- Password Fields -->
     <label for="password">Password</label>
+<div style="position: relative;">
     <input type="password" id="password" name="password" placeholder="Password" required>
-    <div id="password-feedback" class="password-feedback">
-        <div id="strength-bar" class="strength-bar"></div>
-        <p id="strength-text"></p>
-    </div>
+    <span class="toggle-password" id="toggle-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">👁️</span>
+</div>
+<div id="password-feedback" class="password-feedback">
+    <div id="strength-bar" class="strength-bar"></div>
+    <p id="strength-text"></p>
+</div>
 
-    <label for="password_confirm">Confirm Password</label>
-<input type="password" id="password_confirm" name="password_confirm" placeholder="Confirm Password" required>
+<label for="password_confirm">Confirm Password</label>
+<div style="position: relative;">
+    <input type="password" id="password_confirm" name="password_confirm" placeholder="Confirm Password" required>
+    <span class="toggle-password" id="toggle-password-confirm" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">👁️</span>
+</div>
 <p id="match-feedback" class="feedback"></p>
+
 
     <button type="button" onclick="showSection('section-communication')">Back</button>
     <button type="submit">Create Account</button>
@@ -277,7 +284,7 @@
 
     
 
-    const passwordInput = document.getElementById("password");
+const passwordInput = document.getElementById("password");
 const confirmPasswordInput = document.getElementById("password_confirm");
 const strengthBar = document.getElementById("strength-bar");
 const strengthText = document.getElementById("strength-text");
@@ -314,6 +321,68 @@ function checkPasswordMatch() {
         matchFeedback.className = "feedback";
     }
 }
+ 
+// check email status
+let debounceEmailTimeout;
+    document.getElementById('email').addEventListener('input', function () {
+        clearTimeout(debounceEmailTimeout);
+
+        const email = this.value.trim();
+        const feedback = document.getElementById('email-feedback');
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // Basic email format validation
+
+        feedback.innerHTML = ''; // Clear feedback initially
+
+        // Simple email format validation
+        if (!emailPattern.test(email)) {
+            feedback.innerHTML = '<span style="color: red;">Please enter a valid email address.</span>';
+            return;
+        }
+
+        // Debounce to reduce API calls
+        debounceEmailTimeout = setTimeout(() => {
+            // Send AJAX request to check email availability
+            fetch(`/check-email/?email=${encodeURIComponent(email)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_taken) {
+                        feedback.innerHTML = '<span style="color: red;">This email is already in use. <a href="/login">Go to login</a>.</span>';
+                    } else {
+                        feedback.innerHTML = '<span style="color: green;">Email is available.</span>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking email:', error);
+                });
+        }, 300); // Delay of 300ms for debounce
+    });
+
+    // eye button for show password
+
+    document.addEventListener('DOMContentLoaded', function () {
+    function togglePasswordVisibility(inputId, toggleId) {
+        const passwordField = document.getElementById(inputId);
+        const toggleButton = document.getElementById(toggleId);
+
+        toggleButton.addEventListener('click', function () {
+            // Change input type to "text" for visibility
+            passwordField.type = 'text';
+            
+            // Disable toggle button to prevent repeated clicks
+            toggleButton.style.pointerEvents = 'none';
+
+            // Reset to "password" type after 3 seconds
+            setTimeout(() => {
+                passwordField.type = 'password';
+                toggleButton.style.pointerEvents = 'auto';
+            }, 2000);
+        });
+    }
+
+    togglePasswordVisibility('password', 'toggle-password');
+    togglePasswordVisibility('password_confirm', 'toggle-password-confirm');
+});
+
 
     </script>
     
