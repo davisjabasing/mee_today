@@ -32,6 +32,12 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change_password'),
 
 
+    # path('send-otp/', views.send_otp, name='send_otp'),
+    # path('verify-otp/', views.verify_otp, name='verify_otp'),
+    # path('change-password/', views.change_password, name='change_password'),
+    # path('resend-otp/', views.resend_otp, name='resend_otp'),
+
+
 
     path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
 
