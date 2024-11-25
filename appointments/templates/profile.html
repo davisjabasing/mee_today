@@ -1,18 +1,29 @@
 {% extends 'base.html' %}
+
+{% block css %}
+{% load static %}
+
+    <link rel="stylesheet" href="{% static 'profile.css' %}">
+{% endblock %}
+
 {% block content %}
+<div class="container">
     <h2>{{ profile.user.username }}'s Profile</h2>
-    <p><strong>Name:</strong> {{ profile.user.username }}</p>
-    <p><strong>Profession:</strong> {{ profile.profession }}</p>
+    <p><strong>Everyone calls him:</strong> {{ profile.user.username }}</p>
+    <p><strong>He is a </strong> {{ profile.profession }}</p>
     <p><strong>Location:</strong> {{ profile.location }}</p>
     <p><strong>Description:</strong> {{ profile.description }}</p>
     
+    <!-- Profession Details -->
+    <p><strong>He is a:</strong> {{ profession_details }}</p>
+
+    <!-- Appointment Form -->
     <form method="POST">
         {% csrf_token %}
         <h3>Request an Appointment</h3>
         <textarea name="reason" placeholder="Reason for appointment" required></textarea>
         <input type="datetime-local" name="date" required>
-        
-        <!-- New dropdown to select time period -->
+
         <label for="duration">Select Duration:</label>
         <select name="duration" required>
             <option value="15">15 mins</option>
@@ -24,4 +35,5 @@
 
         <button type="submit">Request Appointment</button>
     </form>
+</div>
 {% endblock %}

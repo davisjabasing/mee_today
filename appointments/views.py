@@ -244,15 +244,22 @@ def change_password(request):
 
 @login_required
 def profile_view(request, user_id):
-    user_profile = UserProfile.objects.get(user_id=user_id)
+    user_profile = get_object_or_404(UserProfile, user_id=user_id)
     received_requests = Appointment.objects.filter(recipient=request.user, status='pending')
     
+    # Profession-specific details
+    if user_profile.profession == "Student":
+        profession_details = f" {user_profile.field_of_study} @ {user_profile.university}"
+    elif user_profile.profession == "Professional":
+        profession_details = f" {user_profile.designation} @ {user_profile.company}"
+    else:
+        profession_details = "Profession details not available."
+
     if request.method == 'POST':
         reason = request.POST.get('reason')
         date = request.POST.get('date')
         duration = request.POST.get('duration')
 
-        # Convert date string to datetime object
         start_time = datetime.strptime(date, '%Y-%m-%dT%H:%M')
         end_time = start_time + timedelta(minutes=int(duration))
 
@@ -265,8 +272,12 @@ def profile_view(request, user_id):
             status='pending'
         )
         return redirect('home')
-    
-    return render(request, 'profile.html', {'profile': user_profile, 'received_requests': received_requests})
+
+    return render(
+        request,
+        'profile.html',
+        {'profile': user_profile, 'profession_details': profession_details, 'received_requests': received_requests}
+    )
 
 @login_required
 def notifications_view(request):

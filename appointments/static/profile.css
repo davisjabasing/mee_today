@@ -1,0 +1,124 @@
+/* Profile Container */
+.container {
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 30px;
+    max-width: 600px;
+    margin: 20px auto;
+    box-sizing: border-box;
+}
+
+/* Profile Header */
+.container h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #0073e6;
+    text-align: center;
+}
+
+/* Profile Details */
+.container p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 10px 0;
+}
+
+.container p strong {
+    color: #0073e6;
+}
+
+/* Appointment Form */
+form {
+    margin-top: 20px;
+    background-color: #f4f7f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #0073e6;
+}
+
+/* Input Fields */
+textarea,
+input[type="datetime-local"],
+select {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    background: #ffffff;
+}
+
+textarea:focus,
+input:focus,
+select:focus {
+    border-color: #0073e6;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 115, 230, 0.5);
+}
+
+/* Dropdown Label */
+form label {
+    font-size: 1rem;
+    color: #333;
+    display: block;
+    margin: 10px 0 5px;
+}
+
+/* Button Styling */
+form button {
+    background-color: #0073e6;
+    color: #ffffff;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 15px;
+}
+
+form button:hover {
+    background-color: #005bb5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    form {
+        padding: 15px;
+    }
+
+    textarea,
+    input[type="datetime-local"],
+    select {
+        font-size: 0.9rem;
+    }
+
+    form button {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container h2 {
+        font-size: 1.5rem;
+    }
+
+    .container p,
+    form label {
+        font-size: 0.9rem;
+    }
+}
