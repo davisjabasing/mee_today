@@ -84,12 +84,25 @@ WSGI_APPLICATION = 'mee_today.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',  # Change to 'mysql' if using MySQL
+        'NAME': 'meetoday',            # Replace with your DB name
+        'USER': 'admin',          # Replace with your DB username
+        'PASSWORD': 'Since1998',             # Replace with your DB password
+        'HOST': 'meetodayproject.cna0002oobb1.ap-south-1.rds.amazonaws.com',  # RDS endpoint
+        'PORT': '3306',  # 3306 for MySQL
     }
 }
+
 
 
 # Password validation
