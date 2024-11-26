@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userprofile',
             name='phone_number',
-            field=models.CharField(default=django.utils.timezone.now, max_length=15),
+            field=models.CharField(max_length=15, null=True, blank=True, default=None),
             preserve_default=False,
         ),
         migrations.AlterField(

@@ -28,8 +28,6 @@ token_generator = PasswordResetTokenGenerator()
 
 
 
-
-
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -454,7 +452,11 @@ def forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         try:
-            user = User.objects.get(email=email)
+            # Check if the email exists in the UserProfile model
+            user_profile = get_object_or_404(UserProfile, email=email)
+            user = user_profile.user  # Get the associated User object
+
+            # Generate password reset token and link
             token = token_generator.make_token(user)
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             reset_link = request.build_absolute_uri(f"/reset-password/{uidb64}/{token}/")
@@ -468,7 +470,7 @@ def forgot_password(request):
             )
             messages.success(request, "Password reset link has been sent to your email.")
             return redirect('login')
-        except User.DoesNotExist:
+        except UserProfile.DoesNotExist:
             return render(request, 'forgot_password.html', {'error': "Email not found in our system."})
     
     return render(request, 'forgot_password.html')

@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userprofile',
             name='pincode',
-            field=models.CharField(default=django.utils.timezone.now, max_length=10),
+            field=models.CharField(default=0, max_length=10),
             preserve_default=False,
         ),
         migrations.AddField(

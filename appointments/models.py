@@ -11,7 +11,7 @@ class UserProfile(models.Model):
 
     # Basic Details
     name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=15, unique=True, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True, default=None)
     email = models.EmailField(unique=True, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     sex = models.CharField(
@@ -26,7 +26,7 @@ class UserProfile(models.Model):
     city = models.CharField(max_length=100, blank=True)
     state = models.CharField(max_length=100, blank=True)
     district = models.CharField(max_length=100, blank=True)
-    pincode = models.CharField(max_length=10, blank=True)
+    pincode = models.CharField(max_length=10, blank=True, default=0)
 
     # Professional Details
     profession = models.CharField(
@@ -51,11 +51,6 @@ class UserProfile(models.Model):
             )
         super().save(*args, **kwargs)
 
-    def clean(self):
-        from django.core.exceptions import ValidationError
-        # Ensure at least one of email or phone number is provided
-        if not self.phone_number and not self.email:
-            raise ValidationError("Either phone number or email must be provided.")
 
     def __str__(self):
         return f"{self.user.username}'s profile"
