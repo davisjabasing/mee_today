@@ -45,6 +45,7 @@ urlpatterns = [
 
     # path('notifications/', views.Notification, name='notifications'),
     # path('appointment/<int:appointment_id>/accept/', views.accept_appointment, name='accept_appointment'),
+    path('users/', views.user_list, name='user_list'),
     # path('appointment/<int:appointment_id>/reject/', views.reject_appointment, name='reject_appointment'),
     # path('appointment/<int:appointment_id>/modify/', views.modify_appointment, name='modify_appointment'),
     

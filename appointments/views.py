@@ -506,3 +506,9 @@ def reset_password(request, uidb64, token):
 
 
 
+def user_list(request):
+    # Get all users from the UserProfile model
+    users = UserProfile.objects.all()
+    
+    # Pass the users to the template
+    return render(request, 'user_list.html', {'users': users})

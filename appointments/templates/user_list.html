@@ -1,0 +1,32 @@
+<!-- user_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>All Users</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>University</th>
+                <th>Date of Birth</th>
+                <th>Sex</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.phone_number }}</td>
+                    <td>{{ user.university }}</td>
+                    <td>{{ user.date_of_birth }}</td>
+                    <td>{{ user.sex }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
